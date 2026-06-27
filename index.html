@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Buscador SKUs — Aseguramiento de Calidad</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(180deg, #f8fafc 0%, #e0e7ff 100%);
+  min-height: 100vh;
+  color: #0f172a;
+  padding: 12px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container { max-width: 800px; margin: 0 auto; }
+
+/* ═══ Header ═══ */
+.header {
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+  color: white;
+  padding: 18px 20px;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(22,101,52,0.25);
+}
+
+.header h1 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.header .meta {
+  font-size: 12px;
+  opacity: 0.9;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.header .meta strong { font-family: 'SF Mono', Monaco, monospace; }
+
+/* ═══ Tabs ═══ */
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  background: white;
+  padding: 5px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.tab {
+  flex: 1;
+  padding: 11px 8px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.tab:active { transform: scale(0.97); }
+.tab.active {
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(22,101,52,0.3);
+}
+
+/* ═══ Search Box ═══ */
+.search-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+}
+
+.search-box {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 16px 16px 16px 50px;
+  font-size: 17px;
+  font-weight: 600;
+  border: 2.5px solid #166534;
+  border-radius: 14px;
+  background: #f0fdf4;
+  color: #166534;
+  font-family: inherit;
+  -webkit-appearance: none;
+}
+
+.search-box input:focus {
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 5px rgba(22,101,52,0.15);
+}
+
+.search-box::before {
+  content: '🔍';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+}
+
+.search-box .clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #e5e7eb;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #64748b;
+  display: none;
+  font-weight: bold;
+}
+
+.search-box .clear-btn.show { display: block; }
+.search-box .clear-btn:active { background: #d1d5db; }
+
+.helper-text {
+  font-size: 12px;
+  color: #64748b;
+  padding: 4px 6px;
+}
+
+.helper-text strong { color: #166534; }
+
+/* ═══ Lote Input ═══ */
+.lote-section {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+}
+
+.lote-section label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #92400e;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.lote-section input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid #f97316;
+  border-radius: 8px;
+  background: white;
+  color: #ea580c;
+  font-family: 'SF Mono', Monaco, monospace;
+  letter-spacing: 2px;
+  text-align: center;
+  -webkit-appearance: none;
+}
+
+.lote-section input:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(249,115,22,0.2);
+}
+
+.lote-section .lote-tip {
+  font-size: 11px;
+  color: #92400e;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.lote-quick {
+  display: inline-block;
+  background: #fbbf24;
+  color: #78350f;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+.lote-quick:active { background: #f59e0b; }
+
+/* ═══ Results List ═══ */
+.results-info {
+  padding: 10px 14px;
+  background: #eff6ff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sku-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sku-card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid #cbd5e1;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sku-card:active { transform: scale(0.99); }
+.sku-card.expanded { border-left-color: #166534; box-shadow: 0 6px 20px rgba(22,101,52,0.15); }
+
+.sku-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sku-card-left { flex: 1; min-width: 0; }
+
+.sku-code {
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ea580c;
+  background: #fffbeb;
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.sku-desc {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.sku-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.sku-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.sku-tag.familia { background: #f5f3ff; color: #6d28d9; }
+.sku-tag.marca { background: #dbeafe; color: #1e40af; }
+.sku-tag.presentacion { background: #e0e7ff; color: #4338ca; font-weight: 700; }
+
+.sku-card-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.vence-mini {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.vence-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-top: 2px;
+}
+
+.dias-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.dias-badge.urgent { background: #fee2e2; color: #b91c1c; }
+.dias-badge.warning { background: #fef3c7; color: #92400e; }
+.dias-badge.ok { background: #dcfce7; color: #166534; }
+
+/* ═══ Expanded Detail ═══ */
+.sku-detail {
+  display: none;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.sku-card.expanded .sku-detail { display: block; }
+
+.detail-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.detail-card {
+  background: #f8fafc;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border-left: 3px solid #cbd5e1;
+}
+
+.detail-card.hoy { background: #fce7f3; border-left-color: #ec4899; }
+.detail-card.lote { background: #fffbeb; border-left-color: #f97316; }
+.detail-card.vida { background: #dbeafe; border-left-color: #2563eb; }
+.detail-card.vence { background: #f0fdf4; border-left-color: #22c55e; }
+
+.detail-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.detail-value.lote-val { font-family: 'SF Mono', Monaco, monospace; color: #be185d; }
+.detail-value.fecha { color: #1e3a8a; }
+.detail-value.urgent { color: #b91c1c; }
+.detail-value.warning { color: #92400e; }
+.detail-value.ok { color: #166534; }
+
+.rebanado-section {
+  background: #f5f3ff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+
+.rebanado-section .reb-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6d28d9;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+}
+
+.rebanado-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 6px;
+}
+
+.reb-item {
+  background: white;
+  padding: 6px 9px;
+  border-radius: 6px;
+  border: 1px solid #c7d2fe;
+}
+
+.reb-item-label {
+  font-size: 9px;
+  color: #6d28d9;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.reb-item-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4338ca;
+  margin-top: 1px;
+}
+
+/* ═══ Categoría Filters ═══ */
+.filters-panel {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-item.full { grid-column: 1 / -1; }
+
+.filter-item label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4338ca;
+}
+
+.filter-item select,
+.filter-item input {
+  padding: 10px 12px;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  color: #1e293b;
+  font-family: inherit;
+  -webkit-appearance: none;
+}
+
+.filter-item select:focus,
+.filter-item input:focus {
+  outline: none;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 3px rgba(67,56,202,0.15);
+}
+
+.btn-reset {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1.5px solid #fecaca;
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  font-family: inherit;
+}
+
+.btn-reset:active { background: #fee2e2; }
+
+/* ═══ Empty ═══ */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  background: white;
+  border-radius: 14px;
+  color: #94a3b8;
+}
+
+.empty-state .emoji { font-size: 56px; margin-bottom: 10px; opacity: 0.7; }
+.empty-state h3 { font-size: 17px; color: #475569; margin-bottom: 4px; font-weight: 600; }
+.empty-state p { font-size: 13px; }
+
+/* ═══ Panel ═══ */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* iPhone safe areas */
+@supports (padding: max(0px)) {
+  body { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+
+.barcode-box {
+  margin-top: 12px; padding: 14px;
+  background: #0f172a; border-radius: 12px;
+  border: 2px solid #06b6d4; text-align: center;
+  box-shadow: 0 0 16px rgba(6,182,212,0.25);
+}
+.barcode-label {
+  font-size: 11px; font-weight: 700; color: #06b6d4;
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+}
+.barcode-value {
+  font-family: 'Courier New', monospace;
+  font-size: 22px; font-weight: 800; letter-spacing: 4px; color: #fff;
+  padding: 10px;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,0.85) 0 2px, transparent 2px 5px);
+  border-radius: 6px; display: inline-block;
+  text-shadow: 0 0 2px #000, 0 0 4px #000;
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <h1>🔍 Buscador de SKUs</h1>
+    <div class="meta">
+      <span>📅 <strong id="today-date">—</strong></span>
+      <span>🏷️ Lote HOY: <strong id="today-lote">—</strong></span>
+      <span>📦 <strong>374</strong> SKUs</span>
+    </div>
+  </div>
+
+  <!-- ═══ TABS ═══ -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('sku', this)">⚡ Búsqueda Rápida</button>
+    <button class="tab" onclick="switchTab('cat', this)">🗂️ Por Categoría</button>
+  </div>
+
+  <!-- ═══ PANEL: Búsqueda Rápida ═══ -->
+  <div id="panel-sku" class="panel active">
+
+    <div class="search-wrapper">
+      <div class="search-box">
+        <input id="search-input" type="text" placeholder="Escribe SKU, nombre, marca…" autocomplete="off" autocapitalize="off">
+        <button class="clear-btn" id="clear-search" onclick="clearSearch()">✕</button>
+      </div>
+      <div class="helper-text">
+        💡 Puedes buscar por SKU, descripción, marca, familia, categoría o presentación. <strong>Toca cualquier producto</strong> para ver todos los detalles.
+      </div>
+
+      <div class="lote-section">
+        <label>🏷️ Lote para calcular vencimiento (AAMMDD)</label>
+        <input id="lote-input" type="text" placeholder="Ej. 260606" maxlength="6" inputmode="numeric" autocomplete="off">
+        <div class="lote-tip">
+          Usa <button class="lote-quick" onclick="useTodayLote()">Lote HOY</button> · 6 dígitos = año/mes/día
+        </div>
+      </div>
+    </div>
+
+    <div id="search-info" class="results-info">📊 Mostrando los <strong>374</strong> SKUs</div>
+    <div id="sku-list" class="sku-list"></div>
+  </div>
+
+  <!-- ═══ PANEL: Categoría ═══ -->
+  <div id="panel-cat" class="panel">
+
+    <div class="filters-panel">
+      <div class="filter-grid">
+        <div class="filter-item">
+          <label>Familia</label>
+          <select id="f-familia">
+            <option value="">(Todas)</option>
+            <option value="CANTONÉS">CANTONÉS</option>
+<option value="CARNES PREPARADAS">CARNES PREPARADAS</option>
+<option value="JAMONES">JAMONES</option>
+<option value="MÚSCULOS">MÚSCULOS</option>
+<option value="PASTAS BROCHAS">PASTAS BROCHAS</option>
+<option value="PASTAS FINAS">PASTAS FINAS</option>
+<option value="PASTAS FINAS-BROCHAS">PASTAS FINAS-BROCHAS</option>
+<option value="PATES">PATES</option>
+<option value="RECORTE">RECORTE</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Categoría</label>
+          <select id="f-categoria">
+            <option value="">(Todas)</option>
+            <option value="2 PACKS">2 PACKS</option>
+<option value="CANTONÉS">CANTONÉS</option>
+<option value="CARNE DE POLLO">CARNE DE POLLO</option>
+<option value="CARNE DE RES">CARNE DE RES</option>
+<option value="CARNE PARA PIZZA">CARNE PARA PIZZA</option>
+<option value="CHORIZO">CHORIZO</option>
+<option value="CHULETA">CHULETA</option>
+<option value="COMBOS">COMBOS</option>
+<option value="COSTILLA">COSTILLA</option>
+<option value="JAMONES">JAMONES</option>
+<option value="LOMO">LOMO</option>
+<option value="MANO DE PIEDRA">MANO DE PIEDRA</option>
+<option value="MANO PIEDRA">MANO PIEDRA</option>
+<option value="MORCILLA">MORCILLA</option>
+<option value="MORTADELA">MORTADELA</option>
+<option value="MÚSCULOS">MÚSCULOS</option>
+<option value="PACKS">PACKS</option>
+<option value="PATES">PATES</option>
+<option value="PAVO">PAVO</option>
+<option value="PECHUGAS">PECHUGAS</option>
+<option value="PEPERONI">PEPERONI</option>
+<option value="PIERNA">PIERNA</option>
+<option value="POLLO">POLLO</option>
+<option value="RECORTE">RECORTE</option>
+<option value="ROAST BEEF">ROAST BEEF</option>
+<option value="SALAME">SALAME</option>
+<option value="SALCHICHA">SALCHICHA</option>
+<option value="SALCHICHÓN">SALCHICHÓN</option>
+<option value="SANCHICHA">SANCHICHA</option>
+<option value="TOCINOS">TOCINOS</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>Marca</label>
+          <select id="f-marca">
+            <option value="">(Todas)</option>
+            <option value="D.FERD">D.FERD</option>
+<option value="EXT">EXT</option>
+<option value="EXTREMEÑA">EXTREMEÑA</option>
+<option value="FUD">FUD</option>
+<option value="LA EXTREMEÑA">LA EXTREMEÑA</option>
+<option value="LASKA">LASKA</option>
+<option value="SAN RAFAEL">SAN RAFAEL</option>
+<option value="SUPERIOR">SUPERIOR</option>
+<option value="TICAY">TICAY</option>
+<option value="TIKAY">TIKAY</option>
+<option value="ZAR">ZAR</option>
+<option value="ZAR SAN RAFAEL">ZAR SAN RAFAEL</option>
+<option value="ZURQUI">ZURQUI</option>
+<option value="ZURQUÍ">ZURQUÍ</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label>📦 Peso / Presentación</label>
+          <select id="f-presentacion">
+            <option value="">(Todas)</option>
+            <option value="1 KG">1 KG</option>
+<option value="1 kg">1 kg</option>
+<option value="1.016 kg">1.016 kg</option>
+<option value="1.025 kg">1.025 kg</option>
+<option value="1.100 kg">1.100 kg</option>
+<option value="1.200 kg">1.200 kg</option>
+<option value="1.250 kg">1.250 kg</option>
+<option value="1.300 kg">1.300 kg</option>
+<option value="1.350 kg">1.350 kg</option>
+<option value="1.375 kg">1.375 kg</option>
+<option value="1.500 kg">1.500 kg</option>
+<option value="1.600 kg">1.600 kg</option>
+<option value="1.700 kg">1.700 kg</option>
+<option value="100 g">100 g</option>
+<option value="125 g">125 g</option>
+<option value="1KG">1KG</option>
+<option value="2 kg">2 kg</option>
+<option value="2.100 kg">2.100 kg</option>
+<option value="2.300 kg">2.300 kg</option>
+<option value="2.500 kg">2.500 kg</option>
+<option value="2.600 kg">2.600 kg</option>
+<option value="2.700 kg">2.700 kg</option>
+<option value="2.800 kg">2.800 kg</option>
+<option value="200 g">200 g</option>
+<option value="250 g">250 g</option>
+<option value="3.100 kg">3.100 kg</option>
+<option value="3.150 kg">3.150 kg</option>
+<option value="3.200 kg">3.200 kg</option>
+<option value="3.250 kg">3.250 kg</option>
+<option value="3.600 kg">3.600 kg</option>
+<option value="3.700 kg">3.700 kg</option>
+<option value="3.800 kg">3.800 kg</option>
+<option value="3.900 kg">3.900 kg</option>
+<option value="300 g">300 g</option>
+<option value="330 g">330 g</option>
+<option value="350 g">350 g</option>
+<option value="375 g">375 g</option>
+<option value="380 g">380 g</option>
+<option value="4 kg">4 kg</option>
+<option value="4.400 kg">4.400 kg</option>
+<option value="4.500 kg">4.500 kg</option>
+<option value="400 g">400 g</option>
+<option value="450 g">450 g</option>
+<option value="460 g">460 g</option>
+<option value="5 KG">5 KG</option>
+<option value="5 kg">5 kg</option>
+<option value="500 g">500 g</option>
+<option value="508 g">508 g</option>
+<option value="560 g">560 g</option>
+<option value="6 kg">6 kg</option>
+<option value="600 g">600 g</option>
+<option value="625 g">625 g</option>
+<option value="650 g">650 g</option>
+<option value="7 kg">7 kg</option>
+<option value="750 g">750 g</option>
+<option value="800 g">800 g</option>
+<option value="875 g">875 g</option>
+<option value="900 g">900 g</option>
+<option value="908 g">908 g</option>
+<option value="GRANEL">GRANEL</option>
+          </select>
+        </div>
+        <div class="filter-item full">
+          <label>🔎 Búsqueda libre</label>
+          <input id="f-text" type="text" placeholder="SKU, descripción, marca…" autocomplete="off">
+        </div>
+      </div>
+      <button class="btn-reset" onclick="resetFilters()">🔄 Limpiar filtros</button>
+    </div>
+
+    <div class="lote-section" style="margin-bottom:12px;">
+      <label>🏷️ Lote para calcular vencimiento (opcional)</label>
+      <input id="lote-cat-input" type="text" placeholder="Ej. 260606" maxlength="6" inputmode="numeric" autocomplete="off">
+      <div class="lote-tip">
+        Aplica a todos los SKUs filtrados · <button class="lote-quick" onclick="useTodayLoteCat()">Lote HOY</button>
+      </div>
+    </div>
+
+    <div id="cat-info" class="results-info">📊 Cargando…</div>
+    <div id="cat-list" class="sku-list"></div>
+  </div>
+
+</div>
+
+<script>
+const SKUS = [{"sku": "11850", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL ZURQUI 250 G", "vida_util": 50, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "11851", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO PH FUD (menor vacío)", "vida_util": 35, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "11852", "marca": "ZURQUI", "categoria": "COMBOS", "descripcion": "COMBO DE POLLO", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1.375 kg"}, {"sku": "11853", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE POLLO FINAS HIERBAS 250 G FUD", "vida_util": 60, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "11857", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE POLLO ROSTIZADA 250 G FUD", "vida_util": 60, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "11889", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO  DE CERDO CON CHEDAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g", "codigo_barras": "7441008916208"}, {"sku": "11890", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO DE CERDO CON CHIPOTLE", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g", "codigo_barras": "7441008916222"}, {"sku": "11891", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO DE CERDO FINAS HIERBAS", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g", "codigo_barras": "7441008916239"}, {"sku": "11893", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON DE POLLO ZURQUI GRANEL", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "12988", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CON POLLO FP GRANEL", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "13101", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON VIRGINIA ZAR", "vida_util": 80, "familia": "JAMONES", "presentacion": "3.600 kg"}, {"sku": "13102", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL PZ ZUR", "vida_util": 75, "familia": "JAMONES", "presentacion": "3.100 kg"}, {"sku": "13103", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO ZAR", "vida_util": 100, "familia": "JAMONES", "presentacion": "3.250 kg"}, {"sku": "13104", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON SUBWAY U 1000 G ZAR", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "13112", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA PAVO PZ FUD", "vida_util": 100, "familia": "JAMONES", "presentacion": "2.600 kg"}, {"sku": "13114", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO PZ FUD", "vida_util": 100, "familia": "JAMONES", "presentacion": "2.700 kg"}, {"sku": "13119", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO ZAR  0.5", "vida_util": 50, "familia": "JAMONES", "presentacion": "4.500 kg"}, {"sku": "13122", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON COCIDO ZAR   ", "vida_util": 90, "familia": "JAMONES", "presentacion": "3.600 kg"}, {"sku": "13130", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON DE PAVO AHUM INSTIT ZAR Quiz", "vida_util": 80, "familia": "JAMONES", "presentacion": "2.300 kg"}, {"sku": "13132", "marca": "ZAR", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO AHUM. 4 KG ZAR SNR", "vida_util": 50, "familia": "JAMONES", "presentacion": "4 kg"}, {"sku": "13133", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON PAPA JOHNS ZAR", "vida_util": 45, "familia": "JAMONES", "presentacion": "2.300 kg"}, {"sku": "13136", "marca": "ZAR", "categoria": "PIERNA", "descripcion": "PIERNA AHUMADA ZAR 1500g bola", "vida_util": 70, "familia": "MÚSCULOS", "presentacion": "1.500 kg"}, {"sku": "13138", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO NAVIDEÑO ", "vida_util": 100, "familia": "JAMONES", "presentacion": "900 g"}, {"sku": "13139", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE POLLO FUD bolita", "vida_util": 70, "familia": "JAMONES", "presentacion": "900 g"}, {"sku": "13145", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO EXP FUD PZA", "vida_util": 75, "familia": "JAMONES", "presentacion": "2.700 kg"}, {"sku": "13147", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 125G ZUR", "vida_util": 50, "familia": "JAMONES", "presentacion": "125 g"}, {"sku": "13156", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO  250 G  ZAR SAN RAFAEL", "vida_util": 55, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13158", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON COCIDO 250 G S/P ZAR", "vida_util": 55, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13165", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON PREN 250G E.SEM. ZAR", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13170", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PAVO AHUMADO 250G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13171", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 125G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "125 g"}, {"sku": "13173", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO 250G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13188", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA DELG CON TOCINO PZ ZUR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.600 kg"}, {"sku": "13189", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA SIN TOCINO PZ ZUR", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.600 kg"}, {"sku": "13190", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA PZ ZUR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.600 kg"}, {"sku": "13191", "marca": "SAN RAFAEL", "categoria": "MORTADELA", "descripcion": "MORTADELA CON CHILE PZ ZUR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.600 kg"}, {"sku": "13192", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA CRIOLLA PZ ZUR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.600 kg"}, {"sku": "13201", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA PZ FUD", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.200 kg"}, {"sku": "13215", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA SIN TOCINO 125G ZUR", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "125 g"}, {"sku": "13217", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA 125G ZUR", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "125 g"}, {"sku": "13218", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA CON CHILE 125G ZUR", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "125 g"}, {"sku": "405537", "marca": "EXTREMEÑA", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA REB. EXT minimo 2", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "800 g"}, {"sku": "13239", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA S/TOCINO 250GRS ZUR", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "250 g"}, {"sku": "13247", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA 125 G FUD", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "125 g"}, {"sku": "13252", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON JAMONADO DE PAVO 500 G FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "13255", "marca": "ZAR", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON ITALIANO 500 G ZAR", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "13265", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON C/CHILE IMP 200GRS ZUR(NICARAGUA)", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "200 g"}, {"sku": "13267", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON C/TOC IMP 500GRS ZUR", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "13268", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON C/TOC IMP 200GRS ZUR", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "200 g"}, {"sku": "13269", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON S/TOC IMP L ZUR", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "13271", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO TC. TRAD.L ZUR", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "13272", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCH CRIOLLO C/CHILE ZUR", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "13285", "marca": "ZAR", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON ITALIANO 2 PACK", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "13292", "marca": "ZAR", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DESAYUNO ZAR GRANEL", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "13306", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA FAMILIAR 200GRS ZUR", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "200 g"}, {"sku": "13317", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA IMP GRANEL ZUR", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "13326", "marca": "ZAR", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA 330G E.SEM. ZAR", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "330 g"}, {"sku": "13334", "marca": "ZAR", "categoria": "SALAME", "descripcion": "SALAME COCIDO ZAR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "1.200 kg"}, {"sku": "13336", "marca": "ZAR", "categoria": "PEPERONI", "descripcion": "PEPERONI PIEZA ZAR", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "1.500 kg"}, {"sku": "13339", "marca": "ZAR", "categoria": "PEPERONI", "descripcion": "PEPERONI COCIDO ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "13355", "marca": "FUD", "categoria": "PATES", "descripcion": "PATE 100G FUD", "vida_util": 90, "familia": "PATES", "presentacion": "100 g"}, {"sku": "13361", "marca": "ZAR", "categoria": "PATES", "descripcion": "PATE BURBUJA 100 G ZAR", "vida_util": 90, "familia": "PATES", "presentacion": "100 g"}, {"sku": "13381", "marca": "ZAR", "categoria": "CARNE DE RES", "descripcion": "CARNE DE RES MUS ZAR", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "5 kg"}, {"sku": "13382", "marca": "ZAR", "categoria": "CARNE DE POLLO", "descripcion": "CARNE DE POLLO A ZAR", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "1 kg"}, {"sku": "13383", "marca": "ZAR", "categoria": "CARNE DE RES", "descripcion": "CARNE DE RES A ZAR", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "1 kg"}, {"sku": "13388", "marca": "ZAR", "categoria": "CARNE DE POLLO", "descripcion": "MOLIDA DE POLLO MUSMANNI ZAR", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "5 kg"}, {"sku": "13390", "marca": "ZAR", "categoria": "CARNE PARA PIZZA", "descripcion": "CARNE PARA PIZZA MOLI 2K ZAR", "vida_util": 35, "familia": "PASTAS BROCHAS", "presentacion": "2 kg"}, {"sku": "13393", "marca": "ZAR", "categoria": "CHORIZO", "descripcion": "CHORIZO PRECOCIDO 2K ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "2 kg"}, {"sku": "13399", "marca": "ZAR", "categoria": "CHORIZO", "descripcion": "CHORIZO MEX. 600 GRS U ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "13403", "marca": "ZAR", "categoria": "CHORIZO", "descripcion": "CHORIZO PREC. 600 GRS U ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "13405", "marca": "ZAR", "categoria": "CHORIZO", "descripcion": "CHORIZO PRECOCIDO E.SEM 300G ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "13406", "marca": "ZURQUI", "categoria": "CHORIZO", "descripcion": "CHORIZO PRECOCIDO 200G ZUR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "200 g"}, {"sku": "13408", "marca": "ZAR", "categoria": "PIERNA", "descripcion": "PIERNA ASADA ZAR", "vida_util": 60, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13415", "marca": "ZAR", "categoria": "ROAST BEEF", "descripcion": "ROAST BEEF ESP. ZAR Q", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13420", "marca": "D.FERD", "categoria": "PAVO", "descripcion": "PAVO ASADO 7 KG", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "7 kg"}, {"sku": "13428", "marca": "ZAR", "categoria": "MANO PIEDRA", "descripcion": "MANO DE PIEDRA AHUMADA ZAR", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13429", "marca": "ZAR", "categoria": "PAVO", "descripcion": "PAVO AHUMADO ZAR", "vida_util": 60, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13431", "marca": "ZAR", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA ZAR", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13436", "marca": "ZAR", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUM. REB. ZAR", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "13440", "marca": "ZAR", "categoria": "CHULETA", "descripcion": "CHULETA AHUMADA 20 UNIDADES ZAR", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "13453", "marca": "ZAR", "categoria": "TOCINOS", "descripcion": "TOCINETA 200G E.SEM. ZAR", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "13458", "marca": "ZAR", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 300G S/P ZAR", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "300 g"}, {"sku": "13482", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE PAVO 460G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "460 g"}, {"sku": "13487", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 460G ZUR", "vida_util": 50, "familia": "JAMONES", "presentacion": "460 g"}, {"sku": "13497", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 500G ZAR", "vida_util": 45, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "13500", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE PAVO 500G FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "13515", "marca": "ZAR", "categoria": "SALCHICHA", "descripcion": "SALCHICHA COCTEL ES 300G ZAR", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "300 g"}, {"sku": "13516", "marca": "ZAR", "categoria": "CHORIZO", "descripcion": "SALCHICHA DESAYUNO ES 330G ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "330 g"}, {"sku": "13518", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON CON QUESO MUSMANNI FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "13519", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA DE CERDO PICADA FUD", "vida_util": 25, "familia": "JAMONES", "presentacion": "2 kg"}, {"sku": "13531", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA 350G 8 UNID FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "350 g"}, {"sku": "13538", "marca": "ZAR", "categoria": "SALAME", "descripcion": "SALAMI COCIDO 200 GRS S/P ZAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "200 g"}, {"sku": "13543", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE PAVO 350G EMP.SEM.FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "350 g"}, {"sku": "13553", "marca": "FUD", "categoria": "SALAME", "descripcion": "SALAME REB FUD", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "13555", "marca": "FUD", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 1 KG FUD", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "13558", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN AHUMADO PZ FUD", "vida_util": 75, "familia": "JAMONES", "presentacion": "2.800 kg"}, {"sku": "13561", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA FUD 250", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "250 g"}, {"sku": "13563", "marca": "D.FERD", "categoria": "PAVO", "descripcion": "PECHUGA DE PAVO ASADA DF", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "1.500 kg"}, {"sku": "13565", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN PRENSADO FUD 250G", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "13576", "marca": "FUD", "categoria": "MORCILLA", "descripcion": "MORCILLA MITAD FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "2 kg"}, {"sku": "13583", "marca": "ZAR", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO NATURAL  ZAR", "vida_util": 85, "familia": "JAMONES", "presentacion": "4 kg"}, {"sku": "13588", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN CRIOLLO 500G ZURQUÍ", "vida_util": 90, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14029", "marca": "EXTREMEÑA", "categoria": "CHORIZO", "descripcion": "CHORIZO PRECOCIDO PS EXT 1,5 kg", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1.500 kg"}, {"sku": "14034", "marca": "EXT", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO PS EXT 1KG", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "14035", "marca": "EXTREMEÑA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA COCTEL PS EXT 1 KG", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "14036", "marca": "EXTREMEÑA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE PAVO PS EXT 1,5 KG", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1.500 kg"}, {"sku": "14038", "marca": "EXTREMEÑA", "categoria": "CHORIZO", "descripcion": "SALCHICHA DESAYUNO PS EXT 1KG", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "14039", "marca": "EXT", "categoria": "SALCHICHA", "descripcion": "SALCHICHA HOT DOG PS EXT 1,5 KG", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1.500 kg"}, {"sku": "14040", "marca": "EXT", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE RES JUMBO PS EXT 1,6 K", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1.600 kg"}, {"sku": "14041", "marca": "SAN RAFAEL", "categoria": "JAMONES", "descripcion": "JAMÓN DE CERDO 100% NATURAL", "vida_util": 45, "familia": "JAMONES", "presentacion": "2.500 kg"}, {"sku": "13129", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMÓN DE PAVO SW", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "14079", "marca": "ZURQUI", "categoria": "COMBOS", "descripcion": "COMBO ZURQUÍ     ", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1.200 kg"}, {"sku": "14086", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA 500 G FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14094", "marca": "ZAR", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO ZAR 21 UDS", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "2.100 kg"}, {"sku": "14097", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELITA CUADRADA MIXTA 400", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "400 g"}, {"sku": "14128", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE PAVO PZ FUD", "vida_util": 50, "familia": "JAMONES", "presentacion": "3.150 kg"}, {"sku": "14140", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA INSTITUCIONAL ZURQUÍ 1 Kg", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "14152", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA CON CHILE ZURQUÍ 500 G ", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14158", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL DE PAVO 400 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "400 g"}, {"sku": "14164", "marca": "EXTREMEÑA", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA LA EXTREMEÑA 900 G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "900 g"}, {"sku": "14169", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO 17 CM 1 KG FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "14194", "marca": "ZAR", "categoria": "CHULETA", "descripcion": "CHULETÓN AHUMADO ZAR PS", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "14233", "marca": "EXT", "categoria": "TOCINOS", "descripcion": "TOCINETA CRIOLLA 900 G LA EXTREMEÑA", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "900 g"}, {"sku": "14238", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA DE POLLO 3.6 KG ZURQUI", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.600 kg"}, {"sku": "14274", "marca": "SAN RAFAEL", "categoria": "JAMONES", "descripcion": "JAMON DE CERDO SELECCIÓN NATURAL 250 G", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "14277", "marca": "SAN RAFAEL", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO SELECCIÓN NATURAL 250 G", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "14299", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO 1.7 KG SUPER", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1.700 kg"}, {"sku": "14401", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA 500G ZUR", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14402", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL 500G ZUR", "vida_util": 50, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "14403", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA SIN TOCINO 500G ZUR", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14405", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA CRIOLLA REB GRUESO ZUR", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14482", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO IMPERMEABLE ZURQUI", "vida_util": 90, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "14483", "marca": "ZAR", "categoria": "CHULETA", "descripcion": "CHULETA AHUMADA ZAR-4 UDS", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "500 g"}, {"sku": "14484", "marca": "ZURQUI", "categoria": "CHORIZO", "descripcion": "CHORIZO PRECOCIDO 400G ZUR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "400 g"}, {"sku": "14491", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMÓN PRENSADO DE POLLO ZURQUÍ 250 ", "vida_util": 60, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "14492", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA DE POLLO ZURQUÍ 375 GR ", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "375 g"}, {"sku": "14493", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": " SALCHICHA DE POLLO Q 500 G ", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14494", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN  DE POLLO Q 500 G ", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "406504", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SANCHICHÓN ECONÓMICO 750G ZURQUI", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "750 g"}, {"sku": "14527", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 500 GRS FUD ", "vida_util": 45, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "14529", "marca": "FUD", "categoria": "CANTONÉS", "descripcion": "MEZCLA CANTONES FUD 300 G", "vida_util": 45, "familia": "CANTONÉS", "presentacion": "300 g"}, {"sku": "14562", "marca": "SAN RAFAEL", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO 100% NATURAL  ", "vida_util": 45, "familia": "JAMONES", "presentacion": "2.500 kg"}, {"sku": "14582", "marca": "LASKA", "categoria": "CHORIZO", "descripcion": "CHORIZO CRIOLLO 500 G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14591", "marca": "LASKA", "categoria": "CHORIZO", "descripcion": "SALCHICHA DESAYUNO 500 G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14746", "marca": "LASKA", "categoria": "CHORIZO", "descripcion": "CHORIZO CARNE PIZZERA 1KG", "vida_util": 35, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "14782", "marca": "LASKA", "categoria": "PEPERONI", "descripcion": "PEPERONI AHUMADO 1 KG", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "14784", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA 1 KG", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "14798", "marca": "LASKA", "categoria": "JAMONES", "descripcion": "JAMON PREMIUN 1 KG", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "14821", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA VIENA 2 KG", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "2 kg"}, {"sku": "406446", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CON POLLO 800 G LASKA", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "800 g"}, {"sku": "406445", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CON TOCINO 800 G LASKA", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "800 g"}, {"sku": "15721", "marca": "TICAY", "categoria": "SALCHICHA", "descripcion": "SALCHICHA TICAY GRANEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "15723", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON TICAY GRANEL COLAGENO", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "15724", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON TICAY CON CHILE GRANEL", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "15725", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON TICAY F.P. GRANEL", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "15726", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON TICAY F.P. CHILE GRANEL", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "15730", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON DE PAVO F.P. GRANEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "15731", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "ANILLOS DE PAVO 500G", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "15738", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON JAMONADO GRANEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "15753", "marca": "LASKA", "categoria": "CHULETA", "descripcion": "CHULETA AHUMADA GRANEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "15755", "marca": "LASKA", "categoria": "COSTILLA", "descripcion": "COSTILLA AHUMADA GRANEL", "vida_util": 20, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "15972", "marca": "LASKA", "categoria": "CANTONÉS", "descripcion": "MEZCLA CANTONÉS  350 G", "vida_util": 45, "familia": "CANTONÉS", "presentacion": "350 g"}, {"sku": "15993", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA 500 G SÚPER", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "405219", "marca": "ZURQUI", "categoria": "TOCINOS", "descripcion": "TOCINETA CRIOLLA 200 G ZURQUI", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "405232", "marca": "LASKA", "categoria": "MORCILLA", "descripcion": "MORCILLA 3.9 KG", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405235", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA C CHILE 3.9 KG", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405242", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CON TOCINO ROJA 3.9 KG", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405244", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CRIOLLITA 3.9 KG", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405250", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA DE POLLO 3.9 KG", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.900 kg"}, {"sku": "405254", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA ECONOMICA 3.7 KG", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.700 kg"}, {"sku": "405258", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA 3.9 KG", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405260", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA POP 3.9 KG", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.900 kg"}, {"sku": "405262", "marca": "LASKA", "categoria": "PEPERONI", "descripcion": "PEPERONNI 1.3 KG", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1.300 kg"}, {"sku": "405264", "marca": "LASKA", "categoria": "SALAME", "descripcion": "SALAME 1.3 KG", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1.300 kg"}, {"sku": "405408", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO DE CERDO CON CHIPOTLE", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g", "codigo_barras": "7441008916277"}, {"sku": "405409", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO  DE CERDO CON CHEDDAR", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g", "codigo_barras": "7441008916260"}, {"sku": "405410", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO  FINAS HIERBAS", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g", "codigo_barras": "7441008916253"}, {"sku": "405416", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL FUD 450 G", "vida_util": 50, "familia": "JAMONES", "presentacion": "450 g"}, {"sku": "405425", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN PARRILLERO 50G FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "405426", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN PARRILLERO GRANEL FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "405434", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO BBQ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "405435", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO PARRILLERO", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "405441", "marca": "EXT", "categoria": "JAMONES", "descripcion": "JAMON COCIDO LA EXTREMEÑA 908 G", "vida_util": 55, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "405442", "marca": "EXT", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO PS LA EXTREMEÑA 908 G", "vida_util": 45, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "405488", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CUADRADA 2.8KG", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "2.800 kg"}, {"sku": "405489", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA ESPECIAL DE PAVO 2.8KG", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "2.800 kg"}, {"sku": "405502", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "ANILLO DE POLLO 750GRS", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "750 g"}, {"sku": "405503", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "ANILLO TICAY 750GRS", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "750 g"}, {"sku": "405511", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO 1 KG ", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "405512", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO 560 G ", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "560 g"}, {"sku": "405522", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO 200 G FUD", "vida_util": 50, "familia": "JAMONES", "presentacion": "200 g"}, {"sku": "405531", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "SALCHICHA DESAYUNO ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1.500 kg"}, {"sku": "405539", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON CEBOLLA Y HONGOS 600G SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "405541", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON CEBOLLA Y HONGOS 300G SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406051", "marca": "ZURQUI", "categoria": "SALCHICHA", "descripcion": "SALCHICHA JUMBO 2.1 KG ZURQUI", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "2.100 kg"}, {"sku": "406079", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON ECONÓMICO GRANEL ZURQUI", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "5 kg"}, {"sku": "406154", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CHEDDAR JALAPEÑO FUD 300G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406155", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CHEDDAR JALAPEÑO FUD 600G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "406156", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO PARRILLERO FUD 300G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406157", "marca": "FUD", "categoria": "CHORIZO", "descripcion": "CHORIZO BBQ FUD 300G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406158", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON PARRILLERO JALAPEÑO FUD 500G", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "406160", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMON CON PAVO ZIPACK ZURQUI 350G", "vida_util": 45, "familia": "JAMONES", "presentacion": "350 g"}, {"sku": "406189", "marca": "SAN RAFAEL", "categoria": "PIERNA", "descripcion": "PIERNA DE CERDO ASADA CON SALSA SRF", "vida_util": 60, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "15429", "marca": "LASKA", "categoria": "PEPERONI", "descripcion": "PEPERONI REBANADO 500 G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "15683", "marca": "LASKA", "categoria": "SALAME", "descripcion": "SALAME REBANADO 500 G MAYCA Y DET", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "14255", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA KAVAL 500 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14578", "marca": "LASKA", "categoria": "MÚSCULOS", "descripcion": "CABEZA CHULETA DE CERDO 500 G", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "500 g"}, {"sku": "14590", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "14590-TOCINETA AHUMADA 500 G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "500 g"}, {"sku": "14780", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 1 KG", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "14781", "marca": "LASKA", "categoria": "SALAME", "descripcion": "SALAME AHUMADO 1 KG", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "14823", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELITA CUADRADA MIXTA 1000", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "14849", "marca": "LASKA", "categoria": "JAMONES", "descripcion": "JAMON SPAM 400", "vida_util": 45, "familia": "JAMONES", "presentacion": "400 g"}, {"sku": "15454", "marca": "TICAY", "categoria": "MORTADELA", "descripcion": "MORTADELA CUADRADA TICAY 500G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "15770", "marca": "LASKA", "categoria": "CHULETA", "descripcion": "CHULETA RIÑONADA PICADA AHUM GRANEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "15957", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 200 G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "405420", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE CERDO FUD  ZIPLOC 450 G COCIDO", "vida_util": 55, "familia": "JAMONES", "presentacion": "450 g"}, {"sku": "405421", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO FUD ZIPLOC 450 G", "vida_util": 60, "familia": "JAMONES", "presentacion": "450 g"}, {"sku": "405440", "marca": "EXTREMEÑA", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO COCIDA 908 G LA EXTREMEÑA", "vida_util": 60, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "405451", "marca": "FUD", "categoria": "COMBOS", "descripcion": "3 PACK PECHUGAS SABORIZADAS FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "750 g"}, {"sku": "405461", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CUADRADA FINA 500G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "405500", "marca": "LASKA", "categoria": "RECORTE", "descripcion": "RECORTE DE EMBUTIDOS 1KG", "vida_util": 45, "familia": "RECORTE", "presentacion": "1 kg"}, {"sku": "405520", "marca": "SAN RAFAEL", "categoria": "COMBOS", "descripcion": "3 PACK CHORIZOS SABORIZADOS SAN RAFAEL 900G", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "900 g"}, {"sku": "405550", "marca": "LA EXTREMEÑA", "categoria": "JAMONES", "descripcion": "JAMÓN DE PAVO 908 G LA EXTREMEÑA", "vida_util": 45, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "405565", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE POLLO ZIPLOCK 450 G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "450 g"}, {"sku": "405599", "marca": "LASKA", "categoria": "CHULETA", "descripcion": "CHULETA RIÑONADA AHUMADA 1.5KG", "vida_util": 40, "familia": "MÚSCULOS", "presentacion": "1.500 kg"}, {"sku": "406159", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMON CON POLLO ZIPACK ZURQUI 400G", "vida_util": 45, "familia": "JAMONES", "presentacion": "400 g"}, {"sku": "13562", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLGNA  250 G FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "250 g"}, {"sku": "405419", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON DE PAVO ZIPLOCK 450 gramos", "vida_util": 45, "familia": "JAMONES", "presentacion": "450 g"}, {"sku": "405551", "marca": "EXTREMEÑA", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO AHUMADA LA EXTREMEÑA", "vida_util": 60, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "15688", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE PAVO GRANEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "15961", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA FORMADA 250 G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "250 g"}, {"sku": "14788", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA FORMADA 1 KG", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "15699", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO C CHILE COLAG GRANEL", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "405525", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO 200G FUD", "vida_util": 60, "familia": "JAMONES", "presentacion": "200 g"}, {"sku": "405230", "marca": "LASKA", "categoria": "JAMONES", "descripcion": "JAMON PAVO AHUMADO 3.2 KG", "vida_util": 50, "familia": "JAMONES", "presentacion": "GRANEL"}, {"sku": "14577", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA PAVO  500 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14581", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA FORMADA 500 G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "500 g"}, {"sku": "14263", "marca": "TIKAY", "categoria": "COMBOS", "descripcion": "COMBO TICAY HAMBURGUESA 320 G", "vida_util": 45, "familia": "CARNES PREPARADAS", "presentacion": "GRANEL"}, {"sku": "406134", "marca": "LASKA", "categoria": "COMBOS", "descripcion": "COMBO LASKA 1.375 KG", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "15757", "marca": "LASKA", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA GRANEL", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "405523", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN BAVARIA 200G FUD", "vida_util": 50, "familia": "JAMONES", "presentacion": "200 g"}, {"sku": "15762", "marca": "LASKA", "categoria": "COSTILLA", "descripcion": "PUNTAS ESPECIALES GRANEL", "vida_util": 20, "familia": "MÚSCULOS", "presentacion": "GRANEL"}, {"sku": "406215", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CHEDDAR JALAPEÑO 2PK/600 ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "200 g"}, {"sku": "405529", "marca": "FUD", "categoria": "COMBOS", "descripcion": "COMBO PARRILLERO 1.1KG FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1.100 kg"}, {"sku": "15698", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO COLAG GRANEL", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "405524", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN DE PAVO 200G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "200 g"}, {"sku": "15700", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO PLASTICO GRANEL", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "GRANEL"}, {"sku": "405443", "marca": "EXTREMEÑA", "categoria": "JAMONES", "descripcion": "JAMON DE POLLO 908 G LA EXTREMEÑA", "vida_util": 60, "familia": "JAMONES", "presentacion": "908 g"}, {"sku": "406161", "marca": "SAN RAFAEL", "categoria": "SALCHICHÓN", "descripcion": "Salchichón Granos Ancestrales SRF 500g", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "15704", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "ANILLO CRIOLLO 500G", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "406211", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA CON QUESO 500G  FUD", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "15686", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA ROJA GRANEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "GRANEL"}, {"sku": "14198", "marca": "ZURQUI", "categoria": "CHORIZO", "descripcion": "CHORIZO DE POLLO 400G ZURQUI ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "400 g"}, {"sku": "405519", "marca": "FUD", "categoria": "COMBOS", "descripcion": "2 PACK SALCHICHÓN PARRILLERO 1KG FUD", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "406255", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON SELVA NEGRA 350 GRAMOS FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "350 g"}, {"sku": "406254", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO SABOR MIEL 350 G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "350 g"}, {"sku": "406216", "marca": "EXTREMEÑA", "categoria": "JAMONES", "descripcion": "JAMON VIRGINIA 800 GRAMOS, LA EXTREMEÑA", "vida_util": 50, "familia": "JAMONES", "presentacion": "800 g"}, {"sku": "406164", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON BAVARIA AHUMADO 200 GRAMOS FUD", "vida_util": 50, "familia": "JAMONES", "presentacion": "200 g"}, {"sku": "406248", "marca": "SUPERIOR", "categoria": "TOCINOS", "descripcion": "TOCINETA FORMADA SUPERIOR 200 GRAMOS", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "406257", "marca": "FUD", "categoria": "JAMONES", "descripcion": "BOLITA DE JAMON NAVIDEÑO 500 G", "vida_util": 70, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "406256", "marca": "FUD", "categoria": "JAMONES", "descripcion": "BOLITA DE JAMON AHUMADO SABOR MIEL 500 G", "vida_util": 70, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "406385", "marca": "EXT", "categoria": "CANTONÉS", "descripcion": "CANTONES 600 GRAMOS EXTREMEÑO", "vida_util": 45, "familia": "CANTONÉS", "presentacion": "600 g"}, {"sku": "406405", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "2 PACK SALCHICHÓN CRIOLLO 1KG ZURQUI", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "405370", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO ZAR  ", "vida_util": 50, "familia": "JAMONES", "presentacion": "4.400 kg"}, {"sku": "406374", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON VIRGINIA ZAR", "vida_util": 80, "familia": "JAMONES", "presentacion": "3.800 kg"}, {"sku": "406394", "marca": "SAN RAFAEL", "categoria": "SALCHICHA", "descripcion": "SALCHICHAS  PARA ASAR CON TROZOS DE TOCINO", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "508 g"}, {"sku": "406395", "marca": "SAN RAFAEL", "categoria": "SALCHICHA", "descripcion": "SALCHICHAS  PARA ASAR CON TROZOS DE QUESO CHEDDAR Y TROZOS DE CHILE VERDE Y CHILE JALAPEÑO", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "508 g"}, {"sku": "406398", "marca": "ZURQUI", "categoria": "CARNE PARA PIZZA", "descripcion": "TORTAS DE CARNE OBTENIDAS DEL RABANE DE LAS BARRAS DE CARNE PARA PIZZA", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "450 g"}, {"sku": "406370", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON AHUMADO 4.4 KG ZAR", "vida_util": 50, "familia": "JAMONES", "presentacion": "4.500 kg"}, {"sku": "406371", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON COCIDO 3.6 KG ZAR", "vida_util": 75, "familia": "JAMONES", "presentacion": "3.600 kg"}, {"sku": "406312", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN COCIDO FUD 1 KG", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "406373", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMON PRENSADO 3.2 KG ZAR", "vida_util": 75, "familia": "JAMONES", "presentacion": "3.200 kg"}, {"sku": "406218", "marca": "EXTREMEÑA", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO ZIPACK 500 G LA EXTREMEÑA", "vida_util": 45, "familia": "JAMONES", "presentacion": "500 g"}, {"sku": "15000", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA DE POLLO 1 KG LASKA", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "15449", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CON TOCINO LASKA", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "14032", "marca": "EXTREMEÑA", "categoria": "JAMONES", "descripcion": "JAMON VIRGINIA 1 KG  EXTREMEÑA  ", "vida_util": 45, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "13545", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMÓN VIRGINIA 1.75 KG", "vida_util": 45, "familia": "JAMONES", "presentacion": "1.700 kg"}, {"sku": "13140", "marca": "ZAR", "categoria": "JAMONES", "descripcion": "JAMÓN VIRGINIA 5 KG", "vida_util": 45, "familia": "JAMONES", "presentacion": "5 kg"}, {"sku": "13564", "marca": "ZAR SAN RAFAEL", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE PAVO 250 G ZAR SAN RAFAEL", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "406250", "marca": "ZURQUÍ", "categoria": "SALCHICHA", "descripcion": "SALCHICHA FAMILIAR 625 G ZURQUÍ", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "625 g"}, {"sku": "11855", "marca": "FUD", "categoria": "PECHUGAS", "descripcion": "PECHUGA DE POLLO PICANTE 250G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "14115", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CUADRADA 200 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "200 g"}, {"sku": "405424", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CUADRADA 500G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "406386", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON SELVA NEGRA 800 G FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "800 g"}, {"sku": "15939", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA 125 G LASKA", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "125 g"}, {"sku": "13184", "marca": "ZAR SAN RAFAEL", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA ZAR SAN RAFAEL", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.700 kg"}, {"sku": "13236", "marca": "ZAR SAN RAFAEL", "categoria": "MORTADELA", "descripcion": "MORTADELA JAMONADA 250 G ZAR SAN RAFAEL", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "250 g"}, {"sku": "14033", "marca": "EXTREMEÑA", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGÑA 1 KG  EXTREMEÑA", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "13202", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGÑA FUD", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "3.200 kg"}, {"sku": "13248", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGÑA 125 G FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "125 g"}, {"sku": "405455", "marca": "FUD", "categoria": "2 PACKS", "descripcion": "2 PACK MORTADELA BOLOGNA 900G FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "900 g"}, {"sku": "405456", "marca": "FUD", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGNA 450G FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "450 g"}, {"sku": "13235", "marca": "ZAR SAN RAFAEL", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGÑA 250 G  ZAR SAN RAFAEL", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "250 g"}, {"sku": "13179", "marca": "ZAR SAN RAFAEL", "categoria": "MORTADELA", "descripcion": "MORTADELA CON CHILE DULCE ZAR SAN RAFAEL", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "3.700 kg"}, {"sku": "15937", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA CON CHILE 125 G LASKA", "vida_util": 45, "familia": "PASTAS BROCHAS", "presentacion": "125 g"}, {"sku": "406507", "marca": "ZURQUÍ", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN TICO 500G ZURQUÍ", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "500 g"}, {"sku": "15992", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA SIN GRASA 500 G LASKA", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "405234", "marca": "LASKA", "categoria": "MORTADELA", "descripcion": "MORTADELA BOLOGNA 3.7 KG LASKA", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "3.700 kg"}, {"sku": "14199", "marca": "ZURQUÍ", "categoria": "MORTADELA", "descripcion": "MORTADELA SIN TOCINO 1 KG  ZURQUI", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "405428", "marca": "ZURQUÍ", "categoria": "MORTADELA", "descripcion": "MORTADELA CON POLLO 500 GR ZURQUÍ", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "406217", "marca": "EXTREMEÑA", "categoria": "MORTADELA", "descripcion": "MORTADELA DE POLLO LA EXTREMEÑA 1 KG", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "406399", "marca": "ZURQUÍ", "categoria": "SALCHICHA", "descripcion": "SALCHICHA DE DESAYUNO 330 G ZURQUÍ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "330 g"}, {"sku": "13289", "marca": "ZAR SAN RAFAEL", "categoria": "SALCHICHA", "descripcion": "SALCHICHA HOT DOG ZAR SAN RAFAEL", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1.600 kg"}, {"sku": "13587", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA  2,1 KG FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "2.100 kg"}, {"sku": "405492", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA CNS 1.35 KGS", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1.350 kg"}, {"sku": "13331", "marca": "FUD", "categoria": "SALCHICHA", "descripcion": "SALCHICHA AHUMADA  PAVO 200 G FUD", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "200 g"}, {"sku": "405430", "marca": "SAN RAFAEL", "categoria": "SALCHICHA", "descripcion": "SALCHICHA CON CERDO SELECCIÓN NATURAL 380G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "380 g"}, {"sku": "405431", "marca": "SAN RAFAEL", "categoria": "SALCHICHA", "descripcion": "SALCHICHA CON PAVO SELECCIÓN NATURAL 380G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "380 g"}, {"sku": "13305", "marca": "ZURQUÍ", "categoria": "SALCHICHA", "descripcion": "SALCHICHA HOT DOG 200 G  ZURQUI", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "200 g"}, {"sku": "13489", "marca": "ZURQUÍ", "categoria": "SALCHICHA", "descripcion": "SALCHICHA FAMILIAR 400G ZURQUI", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "400 g"}, {"sku": "406383", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CERVECERO 300 G SAN RAFAEL", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406253", "marca": "EXTREMEÑA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA CON QUESO 1 KG LA EXTREMEÑA", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "406210", "marca": "ZURQUÍ", "categoria": "SALCHICHA", "descripcion": "SALCHICHA CON QUESO ZURQUÍ 500 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "13258", "marca": "ZAR SAN RAFAEL", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON 500 G  ZAR SAN RAFAEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "13254", "marca": "ZAR SAN RAFAEL", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON MEXICANO  500 G  ZAR SAN RAFAEL", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "14236", "marca": "ZURQUÍ", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN  DE POLLO  250 G ZURQUÍ", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "250 g"}, {"sku": "13264", "marca": "ZURQUÍ", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CON CHILE  ZURQUI", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "13270", "marca": "ZURQUÍ", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CON TOCINO  ZURQUI", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "405453", "marca": "ZURQUÍ", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO ZURQUI 650 GR", "vida_util": 25, "familia": "PASTAS BROCHAS", "presentacion": "650 g"}, {"sku": "13253", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN FUD", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "500 g"}, {"sku": "405454", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON PARRILLERO 650G FUD", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "650 g"}, {"sku": "406384", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CERVECER0 600 G SAN RAFAEL", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "406162", "marca": "EXTREMEÑA", "categoria": "2 PACKS", "descripcion": "2PACK SALCHICHÓN PARRILLERO 1 KG LA EXTREMEÑA", "vida_util": 70, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "13568", "marca": "ZAR SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO DE PAVO 300 G  ZAR SAN RAFAEL", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "14416", "marca": "ZURQUÍ", "categoria": "CHULETA", "descripcion": "RECORTE DE CHULETA ZURQUI", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "2 kg"}, {"sku": "405538", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON VINO 600G SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "405540", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON VINO 300G SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406113", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON PIÑA 300 GRS SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}, {"sku": "406112", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO CON PIÑA 600 GRS SRF", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "406259", "marca": "SAN RAFAEL", "categoria": "LOMO", "descripcion": "LOMO DE CERDO ASADO 1.5 KG SAN RAFAEL", "vida_util": 60, "familia": "MÚSCULOS", "presentacion": "1.500 kg"}, {"sku": "406175", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "2 PACK CHORIZOS SABRIZADOS 600 G", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "600 g"}, {"sku": "13341", "marca": "ZAR SAN RAFAEL", "categoria": "SALAME", "descripcion": "SALAME  1.2  KG ZAR SAN RAFAEL", "vida_util": 75, "familia": "PASTAS BROCHAS", "presentacion": "800 g"}, {"sku": "406404", "marca": "ZURQUÍ", "categoria": "PEPERONI", "descripcion": "PEPPERONI AHUMADO 1 KG ZURQUÍ", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "1 kg"}, {"sku": "11892", "marca": "FUD", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA FUD 300G", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "300 g"}, {"sku": "13479", "marca": "FUD", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 1 KG FUD", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "13554", "marca": "FUD", "categoria": "TOCINOS", "descripcion": "TOCINETA AHUMADA 125 G FUD", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "125 g"}, {"sku": "405218", "marca": "ZURQUÍ", "categoria": "TOCINOS", "descripcion": "TOCINETA 1KG ZURQUI", "vida_util": 50, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "406265", "marca": "FUD", "categoria": "JAMONES", "descripcion": "2 PACK JAMONES NAVIDEÑOS 1KG FUD", "vida_util": 70, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "406354", "marca": "EXTREMEÑA", "categoria": "CARNE DE POLLO", "descripcion": "CARNE DE POLLO 1 KG LA EXTREMEÑA", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "1 kg"}, {"sku": "406378", "marca": "FUD", "categoria": "CARNE DE POLLO", "descripcion": "CARNE DE POLLO PREPARADA 450 G FUD", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "450 g"}, {"sku": "406355", "marca": "EXTREMEÑA", "categoria": "CARNE DE RES", "descripcion": "CARNE DE RES 1 KG LA EXTREMEÑA", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "1 kg"}, {"sku": "406379", "marca": "FUD", "categoria": "CARNE DE RES", "descripcion": "CARNE DE RES PREPARADA 450 G FUD", "vida_util": 60, "familia": "CARNES PREPARADAS", "presentacion": "450 g"}, {"sku": "14201", "marca": "ZAR SAN RAFAEL", "categoria": "POLLO", "descripcion": "POLLO ASADO NAVIDEÑO 1 KG ZAR SAN RAFAEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "406323", "marca": "SAN RAFAEL", "categoria": "ROAST BEEF", "descripcion": "ROAST BEEF 200 G SAN RAFAEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "406474", "marca": "SAN RAFAEL", "categoria": "MANO DE PIEDRA", "descripcion": "MITAD MANO DE PIEDRA AHUMADA SAN RAFAEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "1 kg"}, {"sku": "406325", "marca": "SAN RAFAEL", "categoria": "MANO DE PIEDRA", "descripcion": "MANO DE PIEDRA 200 G SAN RAFAEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "13490", "marca": "ZAR", "categoria": "LOMO", "descripcion": "LOMO DE CERDO ASADO 2.5 KGS", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "2.500 kg"}, {"sku": "406382", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "COMBO PARRILLERO LASKA 1 KG", "vida_util": 60, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "406324", "marca": "SAN RAFAEL", "categoria": "LOMO", "descripcion": "LOMO ASADO 200 G SAN RAFAEL", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "200 g"}, {"sku": "13421", "marca": "ZAR", "categoria": "PIERNA", "descripcion": "PIERNA DE CERDO ASADA 6 KG", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "6 kg"}, {"sku": "13548", "marca": "ZAR", "categoria": "PIERNA", "descripcion": "PIERNA DE CERDO ASADA 4 KG", "vida_util": 45, "familia": "MÚSCULOS", "presentacion": "4 kg"}, {"sku": "405501", "marca": "FUD", "categoria": "SALCHICHÓN", "descripcion": "COMBO PARRILLERO 1.25 KGS FUD", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1.250 kg"}, {"sku": "406376", "marca": "LASKA", "categoria": "COMBOS", "descripcion": "COMBO FAMILIAR LASKA 1.025 KG", "vida_util": 45, "familia": "PASTAS FINAS-BROCHAS", "presentacion": "1.025 kg"}, {"sku": "406334", "marca": "ZURQUÍ", "categoria": "PACKS", "descripcion": "AHORRO PACK ZURQUÍ-VILLITA 350 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "350 g"}, {"sku": "406393", "marca": "SAN RAFAEL", "categoria": "PACKS", "descripcion": "2 PACK SALCHICHAS PARA ASAR 1016 G SAN RAFAEL", "vida_util": 50, "familia": "PASTAS BROCHAS", "presentacion": "1.016 kg"}, {"sku": "406540", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA LASKA CARRILERA", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "406512", "marca": "LASKA", "categoria": "SALCHICHA", "descripcion": "SALCHICHA LASKA 330 G", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "330 g"}, {"sku": "406506", "marca": "ZURQUI", "categoria": "SANCHICHA", "descripcion": "SALCHICA ECONÓMICA AHUMADA 1 KG ZURQUI", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "406505", "marca": "ZURQUI", "categoria": "MORTADELA", "descripcion": "MORTADELA ZURQUÍ ", "vida_util": 75, "familia": "PASTAS FINAS", "presentacion": "750 g"}, {"sku": "406590", "marca": "ZURQUI", "categoria": "JAMONES", "descripcion": "JAMÓN PRENSADO PICADO 1KG ZURQUI ", "vida_util": 35, "familia": "JAMONES", "presentacion": "1 kg"}, {"sku": "408224", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON SELVA NEGRA 250 GRAMOS FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "406554", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMON HIERBAS AHUMADAS 250 GRAMOS FUD", "vida_util": 45, "familia": "JAMONES", "presentacion": "250 g"}, {"sku": "406520", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO FP LASKA", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1KG"}, {"sku": "406527", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO FP LASKA", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "5 KG"}, {"sku": "406517", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO FP  ZURQUI", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 KG"}, {"sku": "408202", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN PRENSADO SALSA PIÑA 1,6 KG FUD", "vida_util": 100, "familia": "JAMONES", "presentacion": "900 g"}, {"sku": "408203", "marca": "FUD", "categoria": "JAMONES", "descripcion": "JAMÓN DE POLLO SALSA MANGO 1,6 KG FUD", "vida_util": 70, "familia": "JAMONES", "presentacion": "900 g"}, {"sku": "406530", "marca": "ZURQUI", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHON CRIOLLO FP  ZURQUI", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "5 KG"}, {"sku": "405490", "marca": "ZURQUI", "categoria": "COMBOS", "descripcion": "PACK SALCHICHON DE POLLO 500 G+MORTADELA ESPECIAL 500 G ZURQUI", "vida_util": 50, "familia": "PASTAS FINAS", "presentacion": "1 kg"}, {"sku": "405491", "marca": "ZURQUI", "categoria": "COMBOS", "descripcion": "PACK SALCHICHA AHUMADA 500 G+MORTADELA DE POLLO 375 G ZURQUI", "vida_util": 45, "familia": "PASTAS FINAS", "presentacion": "875 g"}, {"sku": "13417", "marca": "ZAR", "categoria": "ROAST BEEF", "descripcion": "ROAST BEEF REBANADO ZAR Q", "vida_util": 35, "familia": "MÚSCULOS", "presentacion": "1 KG"}, {"sku": "406518", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN CRIOLLO CON CHILE FP 1 KG LASKA ", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "1 KG"}, {"sku": "406529", "marca": "LASKA", "categoria": "SALCHICHÓN", "descripcion": "SALCHICHÓN CRIOLLO CON CHILE FP 5 KG LASKA ", "vida_util": 70, "familia": "PASTAS BROCHAS", "presentacion": "5 KG"}, {"sku": "406560", "marca": "SAN RAFAEL", "categoria": "CHORIZO", "descripcion": "CHORIZO ESPAÑOL SRF 300 g", "vida_util": 60, "familia": "PASTAS BROCHAS", "presentacion": "300 g"}];
+const REBANADO = {"13417": {"producto": "ROAST BEEF ESP REB ZAR sw", "familia": "ESPECIALES", "rebanadas": "", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "", "grosor": "1.70 -1.80", "rpm": "200-600"}, "14291": {"producto": "JAMON DE POLLO SW", "familia": "JAMONES", "rebanadas": "35", "diametro": "12 +-1", "peso_paq": "454 g", "peso_min": "454", "peso_max": "465", "peso_10reb": "", "grosor": "1.70/1.74  /1.75", "rpm": "130-600"}, "14527": {"producto": "JAMÓN PRENSADO FUD 500 gr", "familia": "JAMONES", "rebanadas": "16", "diametro": "12 +-1", "peso_paq": "500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "", "grosor": "2,90 - 3,1", "rpm": "200-600"}, "13147": {"producto": "JAMON PRENSADO 125G ZUR", "familia": "JAMONES", "rebanadas": "6", "diametro": "12 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "405524": {"producto": "JAMÒN DE PAVO FUD 200", "familia": "JAMONES", "rebanadas": "10", "diametro": "12 +-1", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405525": {"producto": "PECHUGA DE PAVO FUD 200", "familia": "JAMONES", "rebanadas": "10", "diametro": "12 +-1", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405522": {"producto": "JAMÒN AHUMADO FUD 200", "familia": "JAMONES", "rebanadas": "10", "diametro": "12 +-1", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "405523": {"producto": "JAMÒN BAVARIA 200 FUD", "familia": "JAMONES", "rebanadas": "10", "diametro": "", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "406164": {"producto": "JAMÒN BAVARIA  AHUMADO 200 FUD", "familia": "JAMONES", "rebanadas": "10", "diametro": "", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13156": {"producto": "JAMON AHUMADAO LIGHT  250 GRAMOS", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13165": {"producto": "JAMON PRENSADO 250 ZAR", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14491": {"producto": "JAMON PRENSADO DE POLLO Q 250", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0,250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13565": {"producto": "JAMON PRENSADO FUD 250", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13158": {"producto": "JAMON CODICO 250 ZAR", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13170": {"producto": "JAMON DE PAVO FUD 250", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14274": {"producto": "JAMON CERDO 100% NATURAL 250G ZAR", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13482": {"producto": "JAMON DE PAVO FUD 460", "familia": "JAMONES", "rebanadas": "21", "diametro": "12 +-1", "peso_paq": "0.460 G", "peso_min": "460", "peso_max": "470", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "400-600"}, "13487": {"producto": "JAMON PRENSADO 460 Q", "familia": "JAMONES", "rebanadas": "21", "diametro": "11 +-1", "peso_paq": "0.460 G", "peso_min": "460", "peso_max": "470", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13497": {"producto": "JAMON PRENSADO 500G SAN RAFAEL", "familia": "JAMONES", "rebanadas": "23", "diametro": "", "peso_paq": "500 g", "peso_min": "500", "peso_max": "515", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405442": {"producto": "JAMÓN PRENSADO PS EXT 1 KG", "familia": "JAMONES", "rebanadas": "44", "diametro": "12 +-1", "peso_paq": "908 g", "peso_min": "908", "peso_max": "918", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405441": {"producto": "JAMON COCIDO LA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "12 +-1", "peso_paq": "908 gramos", "peso_min": "908", "peso_max": "918", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "406216": {"producto": "JAMON VIRGINIA PS EXT 800 GRAMOS", "familia": "JAMONES", "rebanadas": "21", "diametro": "12 +-1", "peso_paq": "800 G", "peso_min": "800", "peso_max": "810", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13129": {"producto": "JAMON DE PAVO SW KILO", "familia": "JAMONES", "rebanadas": "MIN. 54", "diametro": "11.5 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "(185g -194g)", "grosor": "1.60-1.62", "rpm": "300-600"}, "13104": {"producto": "JAMON DE CERDO SW KILO", "familia": "JAMONES", "rebanadas": "MIN. 70", "diametro": "11.5 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "(137g-146g)", "grosor": "1,19 -1,20", "rpm": "300-600"}, "11851": {"producto": "JAMON PICADO Pizza Hut FUD", "familia": "JAMONES", "rebanadas": "32", "diametro": "7.9+-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "", "grosor": "1.50-1.60", "rpm": "200-600"}, "406590": {"producto": "JAMÓN PRENSADO PICADO ZURQUÍ 1 KG", "familia": "JAMONES", "rebanadas": "32", "diametro": "7.9+-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "", "grosor": "1.50-1.60", "rpm": "200-600"}, "13133": {"producto": "JAMON PAPA JOHNS 2.3KG", "familia": "JAMONES", "rebanadas": "", "diametro": "48+-1", "peso_paq": "2.300 KG", "peso_min": "2300", "peso_max": "2.330", "peso_10reb": "28.25+/- 2 g", "grosor": "1,60 a 1,80", "rpm": "200-600"}, "13173": {"producto": "PECHUGA DE PAVO FUD 250", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "250", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "11853": {"producto": "PECHUGA DE POLLO 250G FUD FINAS HIERBAS", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "11857": {"producto": "PECHUGA DE POLLO 250G FUD ROSTIZADO", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14277": {"producto": "PECHUGA DE PAVO 100% NATURAL 250 G ZAR", "familia": "JAMONES", "rebanadas": "12", "diametro": "12 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14034": {"producto": "PECHUGA PAVO AHUMADA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "12 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14849": {"producto": "JAMON SPAM 400G", "familia": "JAMONES", "rebanadas": "18", "diametro": "11 +-1", "peso_paq": "400 GRS", "peso_min": "400", "peso_max": "410", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "14097": {"producto": "MORTADELITA CUADRADA MIXTA 400 GRS", "familia": "JAMONES", "rebanadas": "18", "diametro": "11 +-1", "peso_paq": "400 g", "peso_min": "400 g", "peso_max": "410", "peso_10reb": "220 - 225", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14823": {"producto": "MORTADELITA CUADRADA MIXTA 1kg", "familia": "JAMONES", "rebanadas": "23", "diametro": "12 +-1", "peso_paq": "1000 g", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "220 - 225", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14798": {"producto": "JAMON PREMIUN 1 KG LASKA", "familia": "JAMONES", "rebanadas": "43", "diametro": "11 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13171": {"producto": "JAMON PRENSADO 125G FUD", "familia": "JAMONES", "rebanadas": "6", "diametro": "11 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "405440": {"producto": "PECHUGA PAVO COCIDA 908 G LA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "", "peso_paq": "908 g", "peso_min": "908 g", "peso_max": "913 g", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405443": {"producto": "JAMON DE POLLO 908 G LA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "11 +-1", "peso_paq": "908 g", "peso_min": "908 g", "peso_max": "913 g", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405550": {"producto": "JAMÓN DE PAVO 908 G LA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "", "peso_paq": "908 g", "peso_min": "908 g", "peso_max": "913 g", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405551": {"producto": "PECHUGA PAVO AHUMADA 908 G LA EXTREMEÑA", "familia": "JAMONES", "rebanadas": "44", "diametro": "NA", "peso_paq": "908 g", "peso_min": "908 g", "peso_max": "913 g", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "406312": {"producto": "JAMON COCIDO 1KG FUD", "familia": "JAMONES", "rebanadas": "44", "diametro": "12 +-1", "peso_paq": "1000 g", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "170 - 175", "grosor": "1.13/1.15/1.17", "rpm": "200-600"}, "13248": {"producto": "MORTADELA BOLOGNA 125GRS FUD", "familia": "MORTADELA", "rebanadas": "8", "diametro": "", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13218": {"producto": "MORTADELA CON CHILE 125G ZUR", "familia": "MORTADELA", "rebanadas": "8", "diametro": "105+-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13247": {"producto": "MORTADELA JAMONADA 125GRS FUD", "familia": "MORTADELA", "rebanadas": "8", "diametro": "10 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13215": {"producto": "MORTADELA SIN TOCINO 125G ZUR", "familia": "MORTADELA", "rebanadas": "8", "diametro": "10 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13217": {"producto": "MORTADELA JAMONADA 125G ZUR     SUB: 135443", "familia": "MORTADELA", "rebanadas": "8", "diametro": "10 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13561": {"producto": "MORTADELA JAMONADA FUD 250", "familia": "MORTADELA", "rebanadas": "16", "diametro": "10 +-1", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14492": {"producto": "MORTADELA DE POLLO Q 375 GRS", "familia": "MORTADELA", "rebanadas": "21", "diametro": "10 +-1", "peso_paq": "0,375 G", "peso_min": "375", "peso_max": "380", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "405416": {"producto": "MORTADELA ESPECIAL 450 FUD", "familia": "MORTADELA", "rebanadas": "23", "diametro": "10 +-1", "peso_paq": "0.450 G", "peso_min": "450", "peso_max": "455", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "14402": {"producto": "MORTADELA ESPECIAL 500 Q", "familia": "MORTADELA", "rebanadas": "23", "diametro": "12 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "14405": {"producto": "MORTADELA CRIOLLA 500 Q", "familia": "MORTADELA", "rebanadas": "10", "diametro": "105+-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "", "grosor": "5.95/6.65", "rpm": "150-250"}, "14140": {"producto": "MORTADELA INSTITUCIONAL ZURQUI", "familia": "MORTADELA", "rebanadas": "16", "diametro": "10 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "", "grosor": "2.9", "rpm": "300-600"}, "14403": {"producto": "MORTADELA SIN TOCINO Q 500", "familia": "MORTADELA", "rebanadas": "30", "diametro": "105+-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13519": {"producto": "MORTADELA CERDO 2X1 FUD", "familia": "MORTADELA", "rebanadas": "35", "diametro": "8 +-1", "peso_paq": "2.000 KG", "peso_min": "2000", "peso_max": "2010", "peso_10reb": "", "grosor": "1,5 / 1,6", "rpm": "200-600"}, "15992": {"producto": "MORTADELA LASKA 500 G", "familia": "MORTADELA", "rebanadas": "23", "diametro": "10 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "15938": {"producto": "MORTADELA LASKA 125 G", "familia": "MORTADELA", "rebanadas": "8", "diametro": "10 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "15939": {"producto": "MORTADELA JAMONADA 125 G", "familia": "MORTADELA", "rebanadas": "8", "diametro": "10 +-1", "peso_paq": "0.125 G", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "15454": {"producto": "MORTADELA CUADRADA TICAY 500G", "familia": "MORTADELA", "rebanadas": "23", "diametro": "10 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "515", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "405424": {"producto": "MORTADELA CUADRADA 500G", "familia": "MORTADELA", "rebanadas": "23", "diametro": "10 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "515", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "14115": {"producto": "MORTADELA CUADRADA 200 G", "familia": "MORTADELA", "rebanadas": "12", "diametro": "10 +-1", "peso_paq": "0.200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.5/1.9/2", "rpm": "300-600"}, "405461": {"producto": "MORTADELA CUADRADA FINA LASKA", "familia": "MORTADELA", "rebanadas": "30", "diametro": "10 +-1", "peso_paq": "500 g", "peso_min": "500", "peso_max": "510", "peso_10reb": "(185g -194g)", "grosor": "1.60-1.62", "rpm": "300-600"}, "15937": {"producto": "MORTADELA CON CHILE LASKA", "familia": "MORTADELA", "rebanadas": "30", "diametro": "10 +-1", "peso_paq": "125 g", "peso_min": "125", "peso_max": "130", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "14255": {"producto": "MORTADELA KAVAL", "familia": "MORTADELA", "rebanadas": "16", "diametro": "10 +-1", "peso_paq": "250 g", "peso_min": "250", "peso_max": "260", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "15429": {"producto": "PEPERONI REBANADO 500 G", "familia": "PEPERONE", "rebanadas": "−", "diametro": "8 +-1", "peso_paq": "500 g", "peso_min": "500 g", "peso_max": "510 g", "peso_10reb": "−", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "11850": {"producto": "MORTADELA ESPECIAL 250G ZURQUI", "familia": "MORTADELA", "rebanadas": "12", "diametro": "10 +-1", "peso_paq": "250 g", "peso_min": "250", "peso_max": "265", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13239": {"producto": "MORTADELA S/TOCINO 250GRS ZUR", "familia": "MORTADELA", "rebanadas": "16", "diametro": "10 +-1", "peso_paq": "250 g", "peso_min": "250 g", "peso_max": "260", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13562": {"producto": "MORTADELA BOLOGNA FUD 250", "familia": "MORTADELA", "rebanadas": "16", "diametro": "10 +-1", "peso_paq": "250 g", "peso_min": "250 g", "peso_max": "260", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "14152": {"producto": "MORTADELA CON CHILE 500 Gr ZURQUÍ", "familia": "MORTADELA", "rebanadas": "30", "diametro": "10 +-1", "peso_paq": "500 g", "peso_min": "500 g", "peso_max": "510", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "15000": {"producto": "MORTADELA CON POLLO 1 KG LASKA", "familia": "MORTADELA", "rebanadas": "30", "diametro": "10 +-1", "peso_paq": "1000 g", "peso_min": "1000 g", "peso_max": "1010", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "15449": {"producto": "MORTADELA CON TOCINO ROJA 1 KG GRA", "familia": "MORTADELA", "rebanadas": "15", "diametro": "9.9 +-1", "peso_paq": "1000 g", "peso_min": "1000 g", "peso_max": "1010", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "405537": {"producto": "MORTADELA JAMONADA 800G LA EXTREMEÑA     SUB:135443", "familia": "MORTADELA", "rebanadas": "26 (por buchaca)", "diametro": "12 +-1", "peso_paq": "800 g", "peso_min": "800 g", "peso_max": "810", "peso_10reb": "170 - 175", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "13339": {"producto": "PEPERONI COCIDO ZAR 1KG", "familia": "PEPERONE", "rebanadas": "", "diametro": "8 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "", "grosor": "1.51 - 1.55", "rpm": "200-600"}, "14782": {"producto": "PEPERONI AHUMADO 1 KG", "familia": "PEPERONE", "rebanadas": "Rollos de 125g", "diametro": "8 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "−", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13538": {"producto": "SALAME COCIDO 200 ZAR", "familia": "SALAME", "rebanadas": "Rollos de 50g", "diametro": "8 +-1", "peso_paq": "0.200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-400"}, "13553": {"producto": "SALAME REB FUD", "familia": "SALAME", "rebanadas": "Rollos de 125g", "diametro": "8 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "−", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "15683": {"producto": "SALAME REBANADO 500 G MAYCA LASKA FUNDA IMPERMEABLE", "familia": "SALAME", "rebanadas": "Rollos de 125g", "diametro": "8 +-1", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "515", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "14781": {"producto": "SALAME AHUMADO 1 KG LASKA", "familia": "SALAME", "rebanadas": "Rollos de 125g", "diametro": "8 +-1", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13334": {"producto": "SALAME COCIDO ZAR", "familia": "SALAME", "rebanadas": "Rollos de 125g", "diametro": "8 +-1", "peso_paq": "1000 g", "peso_min": "1000 g", "peso_max": "1015 g", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "200-600"}, "13453": {"producto": "TOCINETA REBANADA ZAR 200 GRAMOS", "familia": "TOCINOS", "rebanadas": "Toc pieza se corta a la mitad", "diametro": "", "peso_paq": "0.200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "2/2.2/2.5", "rpm": "200-400"}, "13458": {"producto": "TOCINETA REBANADA ZAR 300", "familia": "TOCINOS", "rebanadas": "14", "diametro": "", "peso_paq": "0.300 G", "peso_min": "300", "peso_max": "310", "peso_10reb": "", "grosor": "2/2.2/2.5", "rpm": "300-600"}, "14233": {"producto": "TOCIENTA CRIOLLA PS EXT 900 G", "familia": "TOCINOS", "rebanadas": "22", "diametro": "", "peso_paq": "900 gr", "peso_min": "900", "peso_max": "910", "peso_10reb": "", "grosor": "2/2.2/2.7", "rpm": "200-600"}, "14164": {"producto": "TOCINETA AHUMADA REB PS EXT 900 G", "familia": "TOCINOS", "rebanadas": "22", "diametro": "", "peso_paq": "900 gr", "peso_min": "900", "peso_max": "910", "peso_10reb": "", "grosor": "2/2.2/2.5", "rpm": "200-600"}, "13555": {"producto": "TOCINETA AHUMADA 1 KG FUD", "familia": "TOCINOS", "rebanadas": "17", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "", "grosor": "2/2.2/2.6", "rpm": "200-600"}, "13436": {"producto": "TOCINETA AHUMADA  1kg ZAR", "familia": "TOCINOS", "rebanadas": "17", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1010", "peso_10reb": "", "grosor": "2/2.2/2.5", "rpm": "200-600"}, "14581": {"producto": "TOCINETA FORMADA 500 G LASKA", "familia": "TOCINOS", "rebanadas": "11", "diametro": "", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "510", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "15961": {"producto": "TOCINETA FORMADA 250 G  LASKA", "familia": "TOCINOS", "rebanadas": "8", "diametro": "", "peso_paq": "0.250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "14788": {"producto": "TOCINETA FORMADA 1 KG  LASKA", "familia": "TOCINOS", "rebanadas": "22", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "14590": {"producto": "TOCINETA AHUMADA 500 G", "familia": "TOCINOS", "rebanadas": "11", "diametro": "", "peso_paq": "0.500 G", "peso_min": "500", "peso_max": "515", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "15957": {"producto": "TOCINETA AHUMADA 200 G", "familia": "TOCINOS", "rebanadas": "7", "diametro": "", "peso_paq": "200 G", "peso_min": "200", "peso_max": "210", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "14780": {"producto": "TOCINETA AHUMADA 1 KG LASKA", "familia": "TOCINOS", "rebanadas": "22", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "1000", "peso_max": "1015", "peso_10reb": "", "grosor": "2/2.2/2.5", "rpm": "200-600"}, "405219": {"producto": "TOCINETA 200 G ZURQUI", "familia": "TOCINOS", "rebanadas": "7", "diametro": "", "peso_paq": "200 g", "peso_min": "200 g", "peso_max": "210 g", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "300-600"}, "406248": {"producto": "TOCINO FORMADO 200G SUP", "familia": "TOCINOS", "rebanadas": "7", "diametro": "", "peso_paq": "200 G", "peso_min": "200 G", "peso_max": "210", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}, "405419": {"producto": "JAMON DE PAVO FUD ZIPLOC 450G REB DELGADAS", "familia": "ZIPACK", "rebanadas": "35", "diametro": "12 +-1", "peso_paq": "450 G", "peso_min": "450", "peso_max": "460", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "405420": {"producto": "JAMON DE COCIDO FUD ZIPLOC 450G  REB DELGADAS", "familia": "ZIPACK", "rebanadas": "35", "diametro": "12 +-1", "peso_paq": "450 G", "peso_min": "450", "peso_max": "460", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "405421": {"producto": "PECHUGA DE PAVO FUD ZIPLOC 450G  REB DELGADAS", "familia": "ZIPACK", "rebanadas": "35", "diametro": "12 +-1", "peso_paq": "450 G", "peso_min": "450", "peso_max": "460", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "405565": {"producto": "JAMÓN DE POLLO FUD ZIPLOC 450G", "familia": "ZIPACK", "rebanadas": "35", "diametro": "12 +-1", "peso_paq": "450 g", "peso_min": "450", "peso_max": "460", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406218": {"producto": "JAMON CON PECHUGA DE PAVO 500G EXTREMEÑA", "familia": "ZIPACK", "rebanadas": "38", "diametro": "12 +-1", "peso_paq": "500 g", "peso_min": "500", "peso_max": "510", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406254": {"producto": "JAMON AHUMADO SABOR MIEL 350G FUD", "familia": "ZIPACK", "rebanadas": "27", "diametro": "12 +-1", "peso_paq": "350 g", "peso_min": "350", "peso_max": "360", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406255": {"producto": "JAMON SELVA NEGRA 350G FUD", "familia": "ZIPACK", "rebanadas": "27", "diametro": "12 +-1", "peso_paq": "350 g", "peso_min": "350", "peso_max": "360", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406159": {"producto": "JAMON CON POLLO ZIPACK ZURQUI 400G", "familia": "ZIPACK NEW", "rebanadas": "31", "diametro": "12 +-1", "peso_paq": "400 g", "peso_min": "400", "peso_max": "410", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406160": {"producto": "JAMON CON PAVO ZIPACK ZURQUI 350G", "familia": "ZIPACK NEW", "rebanadas": "27", "diametro": "11 +-1", "peso_paq": "350 g", "peso_min": "350", "peso_max": "360", "peso_10reb": "125 - 128", "grosor": "1,13-1,17", "rpm": "300-600"}, "406398": {"producto": "TORTITA 450 G ZURQUI", "familia": "JAMONES", "rebanadas": "7", "diametro": "11 +-1", "peso_paq": "450 g", "peso_min": "450 g", "peso_max": "460 g", "peso_10reb": "125 - 128", "grosor": "8,30 - 8,50", "rpm": "300-600"}, "408224": {"producto": "JAMON SELVA NEGRA 250 g", "familia": "JAMONES", "rebanadas": "18", "diametro": "12 +-1", "peso_paq": "250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "125-128", "grosor": "1.25/1.29", "rpm": "800-1500"}, "406554": {"producto": "JAMON HIERBAS AHUMADAS 250 g", "familia": "JAMONES", "rebanadas": "18", "diametro": "12 +-1", "peso_paq": "250 G", "peso_min": "250", "peso_max": "260", "peso_10reb": "125-129", "grosor": "1.25/1.40", "rpm": "800-1500"}, "13554": {"producto": "TOCINETA FROMADA CRIOLLA FUD 125", "familia": "TOCINETAS", "rebanadas": "", "diametro": "", "peso_paq": "0.125 G", "peso_min": "119.4", "peso_max": "130.6", "peso_10reb": "", "grosor": "1.9/2.2/2.5", "rpm": "130-600"}, "13479": {"producto": "TOCINETA FORMADA  AHUMADA  FUD", "familia": "TOCINETAS", "rebanadas": "", "diametro": "", "peso_paq": "1.000 KG", "peso_min": "985", "peso_max": "1015", "peso_10reb": "", "grosor": "2.8/3/3.3", "rpm": "200-600"}};
+
+// ── Utils ────────────────────────────────────
+function pad2(n){ return n.toString().padStart(2,'0'); }
+
+function todayLote(){
+  const d = new Date();
+  return pad2(d.getFullYear()-2000) + pad2(d.getMonth()+1) + pad2(d.getDate());
+}
+
+function loteToDate(lote){
+  if (!lote || lote.length !== 6 || !/^\d{6}$/.test(lote)) return null;
+  const yy = parseInt(lote.substring(0,2), 10);
+  const mm = parseInt(lote.substring(2,4), 10);
+  const dd = parseInt(lote.substring(4,6), 10);
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+  const d = new Date(2000+yy, mm-1, dd);
+  if (d.getFullYear() !== 2000+yy || d.getMonth() !== mm-1 || d.getDate() !== dd) return null;
+  return d;
+}
+
+function fmtDate(d){
+  if (!d || !(d instanceof Date) || isNaN(d)) return '—';
+  return pad2(d.getDate()) + '/' + pad2(d.getMonth()+1) + '/' + d.getFullYear();
+}
+
+function diasEntre(fecha){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const t = new Date(fecha);
+  t.setHours(0,0,0,0);
+  return Math.round((t - today) / 86400000);
+}
+
+function alertClass(d){
+  if (d === null || d === undefined) return '';
+  if (d <= 7) return 'urgent';
+  if (d <= 20) return 'warning';
+  return 'ok';
+}
+
+function alertLabel(d){
+  if (d <= 0) return '🔴 VENCIDO';
+  if (d <= 7) return '🔴 URGENTE';
+  if (d <= 20) return '🟡 PRÓXIMO';
+  return '🟢 OK';
+}
+
+// ── Header ────────────────────────────────────
+function updateHeader(){
+  document.getElementById('today-date').textContent = fmtDate(new Date());
+  document.getElementById('today-lote').textContent = todayLote();
+}
+
+// ── Tabs ──────────────────────────────────────
+function switchTab(name, btn){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── Card Rendering ────────────────────────────
+function renderCard(sku, lote){
+  const reb = REBANADO[sku.sku];
+  const today = new Date();
+  const venceHoy = new Date(today.getTime() + sku.vida_util * 86400000);
+
+  // Lote info
+  let loteInfo = '';
+  if (lote && /^\d{6}$/.test(lote)) {
+    const fechaLote = loteToDate(lote);
+    if (fechaLote) {
+      const venceLote = new Date(fechaLote.getTime() + sku.vida_util * 86400000);
+      const dias = diasEntre(venceLote);
+      const ac = alertClass(dias);
+      loteInfo = `
+        <div class="detail-card lote">
+          <div class="detail-label">🏷️ Lote</div>
+          <div class="detail-value lote-val">${lote}</div>
+        </div>
+        <div class="detail-card lote">
+          <div class="detail-label">Fecha entrada</div>
+          <div class="detail-value fecha">${fmtDate(fechaLote)}</div>
+        </div>
+        <div class="detail-card vence">
+          <div class="detail-label">Fecha vence</div>
+          <div class="detail-value fecha">${fmtDate(venceLote)}</div>
+        </div>
+        <div class="detail-card vence">
+          <div class="detail-label">Días restantes</div>
+          <div class="detail-value ${ac}">${dias}d ${alertLabel(dias).substring(0,2)}</div>
+        </div>
+      `;
+    } else {
+      loteInfo = `<div class="detail-card" style="background:#fef2f2; border-left-color:#ef4444;">
+        <div class="detail-label">⚠️ Lote inválido</div>
+        <div class="detail-value" style="color:#991b1b; font-size:11px;">Usa formato AAMMDD</div>
+      </div>`;
+    }
+  }
+
+  // Rebanado
+  let rebHtml = '';
+  if (reb) {
+    const fields = [
+      ['Familia', reb.familia],
+      ['Rebanadas/paq', reb.rebanadas],
+      ['Diámetro', reb.diametro],
+      ['Peso paq', reb.peso_paq],
+      ['Peso mín', reb.peso_min],
+      ['Peso máx', reb.peso_max],
+      ['Peso 10reb', reb.peso_10reb],
+      ['Grosor', reb.grosor],
+      ['RPM', reb.rpm],
+    ].filter(([_,v]) => v && v !== 'None' && v !== 'nan');
+
+    if (fields.length) {
+      rebHtml = `
+        <div class="rebanado-section">
+          <div class="reb-title">🟣 Rebanado</div>
+          <div class="rebanado-grid">
+            ${fields.map(([l,v]) => `
+              <div class="reb-item">
+                <div class="reb-item-label">${l}</div>
+                <div class="reb-item-value">${v}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Top right: show "vence hoy" if no lote, else show lote's vencimiento
+  let topRight = '';
+  if (lote && /^\d{6}$/.test(lote) && loteToDate(lote)) {
+    const fechaLote = loteToDate(lote);
+    const venceLote = new Date(fechaLote.getTime() + sku.vida_util * 86400000);
+    const dias = diasEntre(venceLote);
+    const ac = alertClass(dias);
+    topRight = `
+      <div class="vence-mini">Vence (lote ${lote})</div>
+      <div class="vence-date">${fmtDate(venceLote)}</div>
+      <span class="dias-badge ${ac}">${dias}d</span>
+    `;
+  } else {
+    topRight = `
+      <div class="vence-mini">Vence HOY+</div>
+      <div class="vence-date">${fmtDate(venceHoy)}</div>
+      <span class="dias-badge ok">${sku.vida_util}d</span>
+    `;
+  }
+
+  return `
+    <div class="sku-card" onclick="this.classList.toggle('expanded')">
+      <div class="sku-card-header">
+        <div class="sku-card-left">
+          <div class="sku-code">${sku.sku}</div>
+          <div class="sku-desc">${sku.descripcion}</div>
+          <div class="sku-tags">
+            ${sku.familia ? `<span class="sku-tag familia">${sku.familia}</span>` : ''}
+            ${sku.marca ? `<span class="sku-tag marca">${sku.marca}</span>` : ''}
+            ${sku.presentacion ? `<span class="sku-tag presentacion">📦 ${sku.presentacion}</span>` : ''}
+            ${sku.categoria ? `<span class="sku-tag">${sku.categoria}</span>` : ''}
+          </div>
+        </div>
+        <div class="sku-card-right">${topRight}</div>
+      </div>
+
+      <div class="sku-detail">
+        <div class="detail-row">
+          <div class="detail-card vida">
+            <div class="detail-label">Vida útil</div>
+            <div class="detail-value">${sku.vida_util} días</div>
+          </div>
+          <div class="detail-card hoy">
+            <div class="detail-label">Lote HOY</div>
+            <div class="detail-value lote-val" style="color:#be185d;">${todayLote()}</div>
+          </div>
+          <div class="detail-card hoy">
+            <div class="detail-label">Vence HOY+</div>
+            <div class="detail-value fecha" style="color:#be185d;">${fmtDate(venceHoy)}</div>
+          </div>
+          ${loteInfo}
+        </div>
+        ${sku.codigo_barras ? `
+        <div class="barcode-box">
+          <div class="barcode-label">📊 Código de barras (verificar)</div>
+          <div class="barcode-value">${sku.codigo_barras}</div>
+        </div>` : ''}
+        ${rebHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ── Búsqueda Rápida ───────────────────────────
+function renderSkuList(){
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const lote = document.getElementById('lote-input').value.trim();
+  document.getElementById('clear-search').classList.toggle('show', !!q);
+
+  let results = SKUS;
+  if (q) {
+    results = SKUS.filter(s => {
+      const hay = `${s.sku} ${s.descripcion} ${s.marca} ${s.familia} ${s.categoria} ${s.presentacion} ${s.codigo_barras||""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  // Limit to first 50 to keep it fast
+  const shown = results.slice(0, 50);
+
+  document.getElementById('search-info').innerHTML =
+    `📊 ${results.length === SKUS.length ? `Mostrando los <strong>${SKUS.length}</strong> SKUs` :
+       `<strong>${results.length}</strong> resultados` + (results.length > 50 ? ` (mostrando primeros 50)` : '')}` +
+    (q ? ` para "<strong>${q}</strong>"` : '') +
+    (lote && /^\d{6}$/.test(lote) ? ` · 🏷️ Lote: <strong>${lote}</strong>` : '');
+
+  const list = document.getElementById('sku-list');
+  if (!shown.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🔍</div>
+        <h3>Sin resultados</h3>
+        <p>No se encontraron SKUs con "${q}"</p>
+      </div>
+    `;
+    return;
+  }
+  list.innerHTML = shown.map(s => renderCard(s, lote)).join('');
+}
+
+function clearSearch(){
+  document.getElementById('search-input').value = '';
+  renderSkuList();
+  document.getElementById('search-input').focus();
+}
+
+function useTodayLote(){
+  document.getElementById('lote-input').value = todayLote();
+  renderSkuList();
+}
+
+document.getElementById('search-input').addEventListener('input', renderSkuList);
+document.getElementById('lote-input').addEventListener('input', renderSkuList);
+
+// ── Categoría ─────────────────────────────────
+function renderCatList(){
+  const fFam = document.getElementById('f-familia').value;
+  const fCat = document.getElementById('f-categoria').value;
+  const fMar = document.getElementById('f-marca').value;
+  const fPres = document.getElementById('f-presentacion').value;
+  const fText = document.getElementById('f-text').value.trim().toLowerCase();
+  const lote = document.getElementById('lote-cat-input').value.trim();
+
+  const results = SKUS.filter(s => {
+    if (fFam && s.familia !== fFam) return false;
+    if (fCat && s.categoria !== fCat) return false;
+    if (fMar && s.marca !== fMar) return false;
+    if (fPres && s.presentacion !== fPres) return false;
+    if (fText) {
+      const hay = `${s.sku} ${s.descripcion} ${s.marca} ${s.familia} ${s.categoria} ${s.presentacion} ${s.codigo_barras||""}`.toLowerCase();
+      if (!hay.includes(fText)) return false;
+    }
+    return true;
+  });
+
+  // Limit to 100 for performance
+  const shown = results.slice(0, 100);
+
+  document.getElementById('cat-info').innerHTML =
+    `📊 <strong>${results.length}</strong> de ${SKUS.length} SKUs` +
+    (results.length > 100 ? ` (mostrando primeros 100)` : '') +
+    (lote && /^\d{6}$/.test(lote) ? ` · 🏷️ <strong>${lote}</strong>` : '');
+
+  const list = document.getElementById('cat-list');
+  if (!shown.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">🗂️</div>
+        <h3>Sin resultados</h3>
+        <p>Ajusta los filtros para ver SKUs</p>
+      </div>
+    `;
+    return;
+  }
+  list.innerHTML = shown.map(s => renderCard(s, lote)).join('');
+}
+
+function resetFilters(){
+  document.getElementById('f-familia').value = '';
+  document.getElementById('f-categoria').value = '';
+  document.getElementById('f-marca').value = '';
+  document.getElementById('f-presentacion').value = '';
+  document.getElementById('f-text').value = '';
+  renderCatList();
+}
+
+function useTodayLoteCat(){
+  document.getElementById('lote-cat-input').value = todayLote();
+  renderCatList();
+}
+
+['f-familia','f-categoria','f-marca','f-presentacion'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderCatList);
+});
+document.getElementById('f-text').addEventListener('input', renderCatList);
+document.getElementById('lote-cat-input').addEventListener('input', renderCatList);
+
+// ── Init ──────────────────────────────────────
+updateHeader();
+setInterval(updateHeader, 60000);
+renderSkuList();
+renderCatList();
+</script>
+</body>
+</html>
