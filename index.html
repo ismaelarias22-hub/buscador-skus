@@ -20,27 +20,31 @@ body {
 
 /* ═══ Header ═══ */
 .header {
-  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
-  color: white;
-  padding: 18px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  color: #0f172a;
+  padding: 20px 22px;
   border-radius: 16px;
   margin-bottom: 14px;
-  box-shadow: 0 8px 24px rgba(22,101,52,0.25);
+  border-bottom: 3px solid #e2001a;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 .header h1 {
   font-size: 19px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  color: #0f172a;
 }
 
 .header .meta {
   font-size: 12px;
-  opacity: 0.9;
+  color: #64748b;
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
+  margin-top: 12px;
+  font-weight: 600;
 }
 
 .header .meta strong { font-family: 'SF Mono', Monaco, monospace; }
@@ -523,6 +527,34 @@ body {
   text-shadow: 0 0 2px #000, 0 0 4px #000;
 }
 
+
+/* ═══════════ BRANDING CORPORATIVO SIGMA ═══════════ */
+.header-brand {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+}
+.sigma-logo {
+  height: 44px; width: auto; max-width: 160px;
+  object-fit: contain;
+}
+.header-divider {
+  width: 1px; height: 38px;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15), transparent);
+}
+.header-titles { display: flex; flex-direction: column; gap: 2px; }
+.header-titles h1 {
+  font-size: 19px !important; font-weight: 700 !important;
+  letter-spacing: -0.01em; margin: 0 !important; line-height: 1.2;
+}
+.header-dept {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: #e2001a; opacity: 1;
+}
+@media (max-width: 420px) {
+  .sigma-logo { height: 34px; }
+  .header-titles h1 { font-size: 16px !important; }
+  .header-brand { gap: 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -530,7 +562,14 @@ body {
 
   <!-- ═══ HEADER ═══ -->
   <div class="header">
-    <h1>🔍 Buscador de SKUs</h1>
+    <div class="header-brand">
+      <img src="https://www.sigmafoods.com/wp-content/uploads/2025/12/SigmaFoods_2.png" alt="Sigma" class="sigma-logo" onerror="this.style.display='none'">
+      <div class="header-divider"></div>
+      <div class="header-titles">
+        <h1>Buscador de SKUs</h1>
+        <span class="header-dept">Aseguramiento de Calidad</span>
+      </div>
+    </div>
     <div class="meta">
       <span>📅 <strong id="today-date">—</strong></span>
       <span>🏷️ Lote HOY: <strong id="today-lote">—</strong></span>
