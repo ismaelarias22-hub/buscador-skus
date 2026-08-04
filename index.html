@@ -669,6 +669,26 @@ body {
 .pat-btn-subir:active { opacity: 0.85; }
 .pat-status { font-size: 13px; margin-top: 10px; text-align: center; }
 
+
+/* Modal de patógenos MÁS GRANDE */
+#pat-modal .ref-modal-content { max-width: 96vw; width: 96vw; max-height: 94vh; }
+#pat-modal .pat-body { padding: 12px; }
+.pat-imagen-cont img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  cursor: zoom-in;
+}
+.pat-imagen-cont { margin-bottom: 16px; min-height: 200px; }
+/* Zoom pantalla completa al tocar la imagen */
+.pat-zoom-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 10001; overflow: auto; text-align: center; }
+.pat-zoom-overlay.show { display: block; }
+.pat-zoom-overlay img { max-width: none; width: auto; min-width: 100%; margin: auto; cursor: zoom-out; }
+.pat-zoom-cerrar { position: fixed; top: 12px; right: 14px; background: rgba(255,255,255,0.2); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 10002; }
+.pat-zoom-hint { position: fixed; bottom: 14px; left: 0; right: 0; text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; z-index: 10002; }
+
 </style>
 </head>
 <body>
@@ -1510,7 +1530,7 @@ function cargarPatogenos() {
   const cbName = 'cbPat' + Date.now();
   window[cbName] = function(data) {
     if (data.result === 'ok' && data.hay) {
-      cont.innerHTML = '<img src="' + data.url + '" alt="Productos a detener">';
+      cont.innerHTML = '<img src="' + data.url + '" alt="Productos a detener" onclick="abrirZoomPat(this.src)">';
       let txt = '';
       if (data.semana) txt += data.semana;
       if (data.fecha) {
@@ -1587,6 +1607,16 @@ async function subirPatogenos(files) {
   setTimeout(() => { cargarPatogenos(); status.innerHTML = '<span style="color:#16a34a;">✅ Listo. El equipo ya puede verla.</span>'; }, 3500);
 }
 
+
+// Zoom pantalla completa de la imagen de patógenos
+function abrirZoomPat(src) {
+  document.getElementById('pat-zoom-img').src = src;
+  document.getElementById('pat-zoom').classList.add('show');
+}
+function cerrarZoomPat() {
+  document.getElementById('pat-zoom').classList.remove('show');
+}
+
 </script>
 
   <!-- Modal de Referencias Técnicas -->
@@ -1646,6 +1676,14 @@ async function subirPatogenos(files) {
         </div>
       </div>
     </div>
+  </div>
+
+
+  <!-- Zoom pantalla completa de patógenos -->
+  <div id="pat-zoom" class="pat-zoom-overlay" onclick="cerrarZoomPat()">
+    <button class="pat-zoom-cerrar" onclick="cerrarZoomPat()">✕</button>
+    <img id="pat-zoom-img" src="" alt="Productos a detener">
+    <div class="pat-zoom-hint">Toca la imagen o la X para cerrar · Pellizca para acercar</div>
   </div>
 
 </body>
