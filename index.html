@@ -657,6 +657,18 @@ body {
 .crit-fam-titulo { font-size: 14px; font-weight: 900; color: #d13343; margin: 18px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #f5a623; position: sticky; top: 0; background: #fff; z-index: 2; }
 .crit-fam-titulo:first-child { margin-top: 0; }
 
+
+.pat-body { padding: 16px; overflow-y: auto; }
+.pat-fecha { font-size: 12px; color: #64748b; margin-bottom: 10px; text-align: center; font-weight: 600; }
+.pat-imagen-cont { text-align: center; margin-bottom: 20px; min-height: 120px; }
+.pat-imagen-cont img { max-width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; }
+.pat-cargando, .pat-vacio { padding: 40px 20px; color: #94a3b8; font-size: 14px; }
+.pat-admin { border-top: 2px dashed #e2e8f0; padding-top: 16px; }
+.pat-admin-titulo { font-size: 12px; font-weight: 800; color: #7c3aed; margin-bottom: 10px; }
+.pat-btn-subir { width: 100%; padding: 12px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; }
+.pat-btn-subir:active { opacity: 0.85; }
+.pat-status { font-size: 13px; margin-top: 10px; text-align: center; }
+
 </style>
 </head>
 <body>
@@ -698,6 +710,7 @@ body {
       </div>
       <button class="ref-btn" onclick="abrirReferencias()">📚 Referencias Técnicas de Embutido</button>
       <button class="ref-btn" onclick="abrirTodosCriterios()" style="margin-top:8px;background:#d13343;">📖 Ver Todos los Criterios de Calidad</button>
+      <button class="ref-btn" onclick="abrirPatogenos()" style="margin-top:8px;background:#7c3aed;">🦠 Productos a Detener · Patógenos</button>
 
       <div class="lote-section">
         <label>🏷️ Lote para calcular vencimiento (AAMMDD)</label>
@@ -1472,6 +1485,108 @@ function filtrarTodosCriterios() {
   body.innerHTML = h;
 }
 
+
+// ═══════════ PATÓGENOS (productos a detener) ═══════════
+// PEGAR AQUÍ la URL del Apps Script de patógenos:
+const PATOGENOS_URL = 'https://script.google.com/macros/s/AKfycbxKzOzVmkeaj3RyjWT0iSZvmdptIJkKaaqc4F5BkJQ60ZiN7x5eSA5_-bkZRWmWk2-v/exec';
+
+function abrirPatogenos() {
+  document.getElementById('pat-modal').classList.add('show');
+  cargarPatogenos();
+}
+function cerrarPatogenos() {
+  document.getElementById('pat-modal').classList.remove('show');
+}
+
+// Cargar la imagen actual (JSONP para leer la respuesta)
+function cargarPatogenos() {
+  const cont = document.getElementById('pat-imagen-cont');
+  const fechaEl = document.getElementById('pat-fecha');
+  cont.innerHTML = '<div class="pat-cargando">Cargando imagen...</div>';
+  if (!PATOGENOS_URL || PATOGENOS_URL === 'PEGAR_URL_PATOGENOS_AQUI') {
+    cont.innerHTML = '<div class="pat-vacio">⚠️ Falta configurar la URL del Apps Script de patógenos.</div>';
+    return;
+  }
+  const cbName = 'cbPat' + Date.now();
+  window[cbName] = function(data) {
+    if (data.result === 'ok' && data.hay) {
+      cont.innerHTML = '<img src="' + data.url + '" alt="Productos a detener">';
+      let txt = '';
+      if (data.semana) txt += data.semana;
+      if (data.fecha) {
+        const f = new Date(data.fecha);
+        txt += (txt ? ' · ' : '') + 'Actualizado: ' + f.toLocaleDateString() + ' ' + f.toLocaleTimeString().substring(0,5);
+      }
+      fechaEl.textContent = txt;
+    } else {
+      cont.innerHTML = '<div class="pat-vacio">📭 Aún no hay imagen de patógenos para esta semana.</div>';
+      fechaEl.textContent = '';
+    }
+    delete window[cbName];
+  };
+  const s = document.createElement('script');
+  s.src = PATOGENOS_URL + '?modo=ver_patogenos&callback=' + cbName + '&t=' + Date.now();
+  s.onerror = () => { cont.innerHTML = '<div class="pat-vacio">No se pudo cargar la imagen.</div>'; };
+  document.body.appendChild(s);
+}
+
+// Comprimir imagen antes de subir
+function comprimirPatogeno(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const maxDim = 1600;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = h * maxDim / w; w = maxDim; }
+          else { w = w * maxDim / h; h = maxDim; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function subirPatogenos(files) {
+  if (!files || !files.length) return;
+  const status = document.getElementById('pat-status');
+  if (!PATOGENOS_URL || PATOGENOS_URL === 'PEGAR_URL_PATOGENOS_AQUI') {
+    status.innerHTML = '<span style="color:#dc2626;">⚠️ Falta configurar la URL del Apps Script.</span>';
+    return;
+  }
+  status.innerHTML = 'Comprimiendo imagen...';
+  const dataUrl = await comprimirPatogeno(files[0]);
+  const semana = document.getElementById('pat-semana').value.trim();
+  status.innerHTML = 'Subiendo... espera unos segundos';
+
+  const cuerpo = JSON.stringify({ modo: 'guardar_patogenos', foto: dataUrl, semana: semana });
+
+  // Enviar con no-cors + timeout (funciona en APK)
+  const enviar = new Promise((resolve) => {
+    let done = false;
+    const fin = () => { if (!done) { done = true; resolve(); } };
+    fetch(PATOGENOS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: cuerpo
+    }).then(fin).catch(fin);
+    setTimeout(fin, 15000);
+  });
+  await enviar;
+
+  document.getElementById('pat-file').value = '';
+  status.innerHTML = '<span style="color:#16a34a;">✅ Imagen subida. Actualizando...</span>';
+  // Recargar la imagen tras 3 segundos
+  setTimeout(() => { cargarPatogenos(); status.innerHTML = '<span style="color:#16a34a;">✅ Listo. El equipo ya puede verla.</span>'; }, 3500);
+}
+
 </script>
 
   <!-- Modal de Referencias Técnicas -->
@@ -1506,6 +1621,30 @@ function filtrarTodosCriterios() {
         </select>
       </div>
       <div id="crit-modal-body" class="ref-body"></div>
+    </div>
+  </div>
+
+
+  <!-- Modal Patógenos -->
+  <div id="pat-modal" class="ref-modal" onclick="if(event.target===this)cerrarPatogenos()">
+    <div class="ref-modal-content">
+      <div class="ref-modal-header" style="background:#7c3aed;">
+        <span>🦠 Productos a Detener · Patógenos</span>
+        <button onclick="cerrarPatogenos()" class="ref-close">✕</button>
+      </div>
+      <div class="pat-body">
+        <div id="pat-fecha" class="pat-fecha"></div>
+        <div id="pat-imagen-cont" class="pat-imagen-cont">
+          <div class="pat-cargando">Cargando imagen...</div>
+        </div>
+        <div class="pat-admin">
+          <div class="pat-admin-titulo">📤 Actualizar imagen de la semana (solo Calidad)</div>
+          <input id="pat-file" type="file" accept="image/*" style="display:none" onchange="subirPatogenos(this.files)">
+          <input id="pat-semana" type="text" placeholder="Ej. Semana 32 2026" style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
+          <button onclick="document.getElementById('pat-file').click()" class="pat-btn-subir">📷 Seleccionar y subir foto</button>
+          <div id="pat-status" class="pat-status"></div>
+        </div>
+      </div>
     </div>
   </div>
 
