@@ -1088,7 +1088,7 @@ body {
   <div id="panel-mil" class="panel">
 
     <div class="mil-intro">
-      🎯 <strong>Muestreo por Tabla Militar (ANSI/ASQ Z1.4).</strong> Elegí el AQL según el tipo de defecto encontrado, el tipo de muestreo y el tamaño del lote — la app calcula la letra código, el tamaño de muestra y los criterios Ac/Re.
+      🎯 <strong>Muestreo por Tabla Militar.</strong> Elegí el AQL según el tipo de defecto encontrado, el tipo de muestreo y el tamaño del lote — la app calcula la letra código, el tamaño de muestra y los criterios Ac/Re.
       <div class="mil-aql-guide">
         <div class="mil-aql-card" data-aql="4.0" onclick="seleccionarAQL('4.0')">
           <div class="mil-aql-num">4.0</div>
@@ -1572,7 +1572,7 @@ function useTodayLoteCat(){
 document.getElementById('f-text').addEventListener('input', renderCatList);
 document.getElementById('lote-cat-input').addEventListener('input', renderCatList);
 
-// ── Muestreo Militar (ANSI/ASQ Z1.4) ───────────
+// ── Muestreo Militar ───────────
 // Cada fila: [loteMin, loteMax, letra, muestra, ac, re, esAsterisco]
 const TABLAS_MUESTREO = {
   "0.40": {
