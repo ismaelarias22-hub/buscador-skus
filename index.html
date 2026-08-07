@@ -74,6 +74,111 @@ body {
   box-shadow: 0 4px 10px rgba(22,101,52,0.3);
 }
 
+/* ═══ Muestreo Militar ═══ */
+.mil-intro {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  font-size: 12.5px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.mil-aql-guide {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.mil-aql-card {
+  border-radius: 10px;
+  padding: 8px 6px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.mil-aql-card .mil-aql-num { font-size: 15px; font-weight: 800; }
+.mil-aql-card .mil-aql-txt { font-size: 9.5px; font-weight: 700; margin-top: 3px; line-height: 1.25; }
+
+.mil-aql-card[data-aql="4.0"] { background: #dcfce7; color: #16a34a; }
+.mil-aql-card[data-aql="2.5"] { background: #fef3c7; color: #b45309; }
+.mil-aql-card[data-aql="1.0"] { background: #fef9c3; color: #a16207; }
+.mil-aql-card[data-aql="0.40"] { background: #fee2e2; color: #dc2626; }
+
+.mil-aql-card.selected { border-color: currentColor; box-shadow: 0 2px 8px rgba(0,0,0,0.12); transform: translateY(-1px); }
+
+.mil-form {
+  background: white;
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.mil-tipo-toggle { display: flex; gap: 8px; margin-top: 4px; }
+.mil-tipo-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px solid #c7d2fe;
+  border-radius: 8px;
+  background: white;
+  color: #334155;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mil-tipo-btn.active { background: #4338ca; border-color: #4338ca; color: white; }
+
+.mil-calc-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  background: #1a2332;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.mil-calc-btn:active { opacity: 0.85; }
+
+.mil-result {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  border-left: 5px solid #1a2332;
+}
+.mil-result.pendiente { border-left-color: #dc2626; }
+
+.mil-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.mil-result-item {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+.mil-result-item .mil-r-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; }
+.mil-result-item .mil-r-value { font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 2px; }
+.mil-result-item.ac .mil-r-value { color: #16a34a; }
+.mil-result-item.re .mil-r-value { color: #dc2626; }
+
+.mil-warn { font-size: 12px; color: #b45309; background: #fef3c7; border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-weight: 600; }
+.mil-empty { font-size: 12.5px; color: #64748b; text-align: center; padding: 8px 0; }
+
 /* ═══ Search Box ═══ */
 .search-wrapper {
   background: white;
@@ -786,6 +891,7 @@ body {
   <div class="tabs">
     <button class="tab active" onclick="switchTab('sku', this)">⚡ Búsqueda Rápida</button>
     <button class="tab" onclick="switchTab('cat', this)">🗂️ Por Categoría</button>
+    <button class="tab" onclick="switchTab('mil', this)">🎯 Muestreo Militar</button>
   </div>
 
   <!-- ═══ PANEL: Búsqueda Rápida ═══ -->
@@ -976,6 +1082,53 @@ body {
 
     <div id="cat-info" class="results-info">📊 Cargando…</div>
     <div id="cat-list" class="sku-list"></div>
+  </div>
+
+  <!-- ═══ PANEL: Muestreo Militar ═══ -->
+  <div id="panel-mil" class="panel">
+
+    <div class="mil-intro">
+      🎯 <strong>Muestreo por Tabla Militar (ANSI/ASQ Z1.4).</strong> Elegí el AQL según el tipo de defecto encontrado, el tipo de muestreo y el tamaño del lote — la app calcula la letra código, el tamaño de muestra y los criterios Ac/Re.
+      <div class="mil-aql-guide">
+        <div class="mil-aql-card" data-aql="4.0" onclick="seleccionarAQL('4.0')">
+          <div class="mil-aql-num">4.0</div>
+          <div class="mil-aql-txt">Aspecto interno (sabor/color/textura)</div>
+        </div>
+        <div class="mil-aql-card" data-aql="2.5" onclick="seleccionarAQL('2.5')">
+          <div class="mil-aql-num">2.5</div>
+          <div class="mil-aql-txt">Empaque / aspecto externo</div>
+        </div>
+        <div class="mil-aql-card" data-aql="1.0" onclick="seleccionarAQL('1.0')">
+          <div class="mil-aql-num">1.0</div>
+          <div class="mil-aql-txt">Materia extraña · demanda/imagen</div>
+        </div>
+        <div class="mil-aql-card" data-aql="0.40" onclick="seleccionarAQL('0.40')">
+          <div class="mil-aql-num">0.40</div>
+          <div class="mil-aql-txt">Daño al consumidor / regulatorio</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mil-form">
+      <div class="filter-item">
+        <label>📦 Tamaño del lote (unidades)</label>
+        <input id="mil-lote" type="number" min="1" placeholder="Ej. 4500" inputmode="numeric">
+      </div>
+
+      <div class="filter-item" style="margin-top:10px;">
+        <label>Tipo de muestreo</label>
+        <div class="mil-tipo-toggle">
+          <button type="button" class="mil-tipo-btn active" id="mil-tipo-normal" onclick="seleccionarTipo('normal')">Normal</button>
+          <button type="button" class="mil-tipo-btn" id="mil-tipo-reducido" onclick="seleccionarTipo('reducido')">Reducido</button>
+        </div>
+        <div id="mil-tipo-aviso" class="mil-warn" style="display:none;margin-top:8px;">ℹ️ Para AQL 0.40 solo está cargada la tabla <strong>Reducida</strong>.</div>
+      </div>
+
+      <button class="mil-calc-btn" onclick="calcularMuestreo()">📐 Calcular muestra</button>
+    </div>
+
+    <div id="mil-result"></div>
+
   </div>
 
 </div>
@@ -1418,6 +1571,163 @@ function useTodayLoteCat(){
 });
 document.getElementById('f-text').addEventListener('input', renderCatList);
 document.getElementById('lote-cat-input').addEventListener('input', renderCatList);
+
+// ── Muestreo Militar (ANSI/ASQ Z1.4) ───────────
+// Cada fila: [loteMin, loteMax, letra, muestra, ac, re, esAsterisco]
+const TABLAS_MUESTREO = {
+  "0.40": {
+    nivel: "II",
+    normal: null, // pendiente: falta la tabla "Muestreo normal con AQL 0.40"
+    reducido: [
+      [2,8,"A",13,0,1,true],[9,15,"B",13,0,1,true],[16,25,"C",13,0,1,false],
+      [26,50,"D",13,0,1,false],[51,90,"E",13,0,1,false],[91,150,"F",13,0,1,false],
+      [151,280,"G",13,0,1,false],[281,500,"H",13,0,1,false],[501,1200,"J",50,0,1,false],
+      [1201,3200,"K",50,0,1,false],[3201,10000,"L",80,0,1,false],[10001,35000,"M",125,0,1,false],
+      [35001,150000,"N",200,0,1,false],[150001,500000,"P",315,0,1,false],[500001,Infinity,"Q",500,0,1,false]
+    ]
+  },
+  "1.0": {
+    nivel: "II",
+    normal: [
+      [2,8,"A",13,0,1,false],[9,15,"B",13,0,1,false],[16,25,"C",13,0,1,false],
+      [26,50,"D",13,0,1,false],[51,90,"E",13,0,1,false],[91,150,"F",13,0,1,false],
+      [151,280,"G",50,1,2,false],[281,500,"H",50,1,2,false],[501,1200,"J",80,2,3,false],
+      [1201,3200,"K",125,3,4,false],[3201,10000,"L",200,5,6,false],[10001,35000,"M",315,7,8,false],
+      [35001,150000,"N",500,10,11,false],[150001,500000,"P",800,14,15,false],[500001,Infinity,"Q",1250,21,22,false]
+    ],
+    reducido: [
+      [2,8,"A",5,0,1,false],[9,15,"B",5,0,1,false],[16,25,"C",5,0,1,false],
+      [26,50,"D",5,0,1,false],[51,90,"E",5,0,1,false],[91,150,"F",5,0,1,false],
+      [151,280,"G",20,0,2,false],[281,500,"H",20,0,2,false],[501,1200,"J",32,1,3,false],
+      [1201,3200,"K",50,1,4,false],[3201,10000,"L",80,2,5,false],[10001,35000,"M",125,3,6,false],
+      [35001,150000,"N",200,5,8,false],[150001,500000,"P",315,7,10,false],[500001,Infinity,"Q",500,10,13,false]
+    ]
+  },
+  "2.5": {
+    nivel: "II",
+    normal: [
+      [2,8,"A",5,0,1,true],[9,15,"B",5,0,1,false],[16,25,"C",5,0,1,false],
+      [26,50,"D",5,0,1,false],[51,90,"E",20,1,2,false],[91,150,"F",20,1,2,false],
+      [151,280,"G",32,2,3,false],[281,500,"H",50,3,4,false],[501,1200,"J",80,5,6,false],
+      [1201,3200,"K",125,7,8,false],[3201,10000,"L",200,10,11,false],[10001,35000,"M",315,14,15,false],
+      [35001,150000,"N",500,21,22,false],[150001,500000,"P",500,21,22,false],[500001,Infinity,"Q",500,21,22,false]
+    ],
+    reducido: [
+      [2,8,"A",2,0,1,false],[9,15,"B",2,0,1,false],[16,25,"C",2,0,1,false],
+      [26,50,"D",2,0,1,false],[51,90,"E",8,0,2,false],[91,150,"F",8,0,2,false],
+      [151,280,"G",13,1,3,false],[281,500,"H",20,1,4,false],[501,1200,"J",32,2,5,false],
+      [1201,3200,"K",50,3,6,false],[3201,10000,"L",80,5,8,false],[10001,35000,"M",125,7,10,false],
+      [35001,150000,"N",200,10,13,false],[150001,500000,"P",200,10,13,false],[500001,Infinity,"Q",200,10,13,false]
+    ]
+  },
+  "4.0": {
+    nivel: "I",
+    normal: [
+      [2,8,"A",3,0,1,true],[9,15,"A",3,0,1,false],[16,25,"B",3,0,1,false],
+      [26,50,"C",3,0,1,false],[51,90,"C",3,0,1,false],[91,150,"D",13,1,2,false],
+      [151,280,"E",13,1,2,false],[281,500,"F",20,2,3,false],[501,1200,"G",32,3,4,false],
+      [1201,3200,"H",50,5,6,false],[3201,10000,"J",80,7,8,false],[10001,35000,"K",125,10,11,false],
+      [35001,150000,"L",200,14,15,false],[150001,500000,"M",315,21,22,false],[500001,Infinity,"N",315,21,22,false]
+    ],
+    reducido: [
+      [2,8,"A",2,0,1,false],[9,15,"A",2,0,1,false],[16,25,"B",2,0,1,false],
+      [26,50,"C",2,0,1,false],[51,90,"C",2,0,1,false],[91,150,"D",5,0,2,false],
+      [151,280,"E",5,0,2,false],[281,500,"F",8,1,3,false],[501,1200,"G",13,1,4,false],
+      [1201,3200,"H",20,2,5,false],[3201,10000,"J",32,3,6,false],[10001,35000,"K",50,5,8,false],
+      [35001,150000,"L",80,7,10,false],[150001,500000,"M",125,10,13,false],[500001,Infinity,"M",125,10,13,false]
+    ]
+  }
+};
+
+let milAQLSeleccionado = null;
+let milTipoSeleccionado = 'normal';
+
+function seleccionarAQL(aql){
+  milAQLSeleccionado = aql;
+  document.querySelectorAll('.mil-aql-card').forEach(c => c.classList.toggle('selected', c.dataset.aql === aql));
+
+  const btnNormal = document.getElementById('mil-tipo-normal');
+  const btnReducido = document.getElementById('mil-tipo-reducido');
+  const avisoDiv = document.getElementById('mil-tipo-aviso');
+
+  if (aql === '0.40'){
+    // Solo existe la tabla reducida para AQL 0.40 — se bloquea Normal
+    btnNormal.disabled = true;
+    btnNormal.style.opacity = '0.4';
+    btnNormal.style.cursor = 'not-allowed';
+    seleccionarTipo('reducido');
+    avisoDiv.style.display = 'block';
+  } else {
+    btnNormal.disabled = false;
+    btnNormal.style.opacity = '1';
+    btnNormal.style.cursor = 'pointer';
+    avisoDiv.style.display = 'none';
+  }
+}
+
+function seleccionarTipo(tipo){
+  milTipoSeleccionado = tipo;
+  document.getElementById('mil-tipo-normal').classList.toggle('active', tipo === 'normal');
+  document.getElementById('mil-tipo-reducido').classList.toggle('active', tipo === 'reducido');
+}
+
+function calcularMuestreo(){
+  const resultDiv = document.getElementById('mil-result');
+  const lote = parseInt(document.getElementById('mil-lote').value, 10);
+
+  if (!milAQLSeleccionado){
+    resultDiv.innerHTML = `<div class="mil-result"><div class="mil-empty">⚠️ Elegí primero el AQL según el tipo de defecto encontrado (tarjetas de arriba).</div></div>`;
+    return;
+  }
+  if (!lote || lote < 2){
+    resultDiv.innerHTML = `<div class="mil-result"><div class="mil-empty">⚠️ Ingresá el tamaño del lote (mínimo 2 unidades).</div></div>`;
+    return;
+  }
+
+  const tabla = TABLAS_MUESTREO[milAQLSeleccionado];
+  const filas = tabla[milTipoSeleccionado];
+
+  if (!filas){
+    resultDiv.innerHTML = `
+      <div class="mil-result pendiente">
+        <div class="mil-empty">🚧 Todavía no tengo la tabla de <strong>Muestreo ${milTipoSeleccionado === 'normal' ? 'Normal' : 'Reducido'} con AQL ${milAQLSeleccionado}</strong>. Súbela y la agrego.</div>
+      </div>`;
+    return;
+  }
+
+  const fila = filas.find(f => lote >= f[0] && lote <= f[1]);
+  if (!fila){
+    resultDiv.innerHTML = `<div class="mil-result"><div class="mil-empty">⚠️ No encontré un rango de lote válido.</div></div>`;
+    return;
+  }
+
+  const [, , letra, muestra, ac, re, asterisco] = fila;
+  const tipoTxt = milTipoSeleccionado === 'normal' ? 'Normal' : 'Reducido';
+
+  resultDiv.innerHTML = `
+    <div class="mil-result">
+      <div style="font-weight:800;font-size:14px;color:#1a2332;">📐 Resultado — AQL ${milAQLSeleccionado} · ${tipoTxt} · Nivel ${tabla.nivel}</div>
+      <div class="mil-result-grid">
+        <div class="mil-result-item">
+          <div class="mil-r-label">Letra código</div>
+          <div class="mil-r-value">${letra}</div>
+        </div>
+        <div class="mil-result-item">
+          <div class="mil-r-label">Tamaño muestra</div>
+          <div class="mil-r-value">${muestra}</div>
+        </div>
+        <div class="mil-result-item ac">
+          <div class="mil-r-label">Ac (Aceptación)</div>
+          <div class="mil-r-value">${ac}</div>
+        </div>
+        <div class="mil-result-item re">
+          <div class="mil-r-label">Re (Rechazo)</div>
+          <div class="mil-r-value">${re}</div>
+        </div>
+      </div>
+      ${asterisco ? '<div class="mil-warn">* Si el tamaño de muestra es igual o mayor al tamaño del lote, la inspección debe realizarse al 100%.</div>' : ''}
+    </div>`;
+}
 
 // ── Init ──────────────────────────────────────
 updateHeader();
